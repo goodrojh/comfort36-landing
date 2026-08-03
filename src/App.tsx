@@ -8,6 +8,7 @@ import Works from './components/Works'
 import Compare from './components/Compare'
 import Reviews from './components/Reviews'
 import Faq from './components/Faq'
+import MapSection from './components/MapSection'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import FloatingContacts from './components/FloatingContacts'
@@ -26,6 +27,7 @@ export default function App() {
       <Compare />
       <Reviews />
       <Faq />
+      <MapSection />
       <Contact />
       <Footer />
       <FloatingContacts />

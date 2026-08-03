@@ -42,6 +42,7 @@ export default function PromoModal() {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [truck, setTruck] = useState('')
+  const [consent, setConsent] = useState(false)
   const shown = useRef(false)
   const { d, h, m, s } = useCountdown()
   useLockScroll(open)
@@ -81,6 +82,7 @@ export default function PromoModal() {
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
+    if (!consent) return
     const text = [
       'Заявка по акции недели (сайт COMFORT 36)',
       `Имя: ${name || '—'}`,
@@ -221,14 +223,38 @@ export default function PromoModal() {
                       placeholder="Модель тягача (например, Volvo FH)"
                       className="w-full rounded-xl border border-ink/15 bg-cream px-4 py-3 text-sm text-ink placeholder:text-muted/70 outline-none focus:border-ink transition-colors"
                     />
+                    <label className="flex items-start gap-2.5 pt-1 cursor-pointer select-none">
+                      <span className="relative shrink-0 mt-0.5">
+                        <input
+                          type="checkbox"
+                          required
+                          checked={consent}
+                          onChange={(e) => setConsent(e.target.checked)}
+                          className="peer sr-only"
+                        />
+                        <span
+                          aria-hidden
+                          className="block w-5 h-5 rounded-md border border-ink/25 bg-cream peer-checked:bg-ink peer-checked:border-ink peer-focus-visible:ring-2 peer-focus-visible:ring-primary/50 transition-colors"
+                        />
+                        <Check
+                          aria-hidden
+                          className="absolute inset-0 m-auto w-3.5 h-3.5 text-cream opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
+                        />
+                      </span>
+                      <span className="text-[11px] text-muted leading-relaxed">
+                        Согласен на обработку персональных данных в соответствии с политикой
+                        конфиденциальности
+                      </span>
+                    </label>
+
                     <button
                       type="submit"
-                      className="w-full rounded-full bg-ink text-cream font-semibold py-3.5 text-sm hover:bg-graphite transition-colors"
+                      disabled={!consent}
+                      className="w-full rounded-full bg-ink text-cream font-semibold py-3.5 text-sm hover:bg-graphite transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-ink"
                     >
                       Забрать −20%
                     </button>
-                    <p className="text-[10px] text-muted text-center leading-relaxed pt-1">
-                      Нажимая кнопку, вы соглашаетесь на обработку персональных данных.
+                    <p className="text-[10px] text-muted text-center leading-relaxed">
                       Заявка уходит мастеру в WhatsApp.
                     </p>
                   </form>

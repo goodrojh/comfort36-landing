@@ -10,6 +10,7 @@ const links = [
   { label: 'Технология', href: '#process' },
   { label: 'Работы', href: '#works' },
   { label: 'Расчёт', href: '#calc' },
+  { label: 'Контакты', href: '#map' },
 ]
 
 const EASE = [0.16, 1, 0.3, 1] as const
@@ -26,7 +27,7 @@ export default function Navbar() {
           initial={{ y: -40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.9, ease: EASE }}
-          className="bg-ink rounded-b-3xl px-8 py-3 flex items-center gap-10 lg:gap-12 shadow-[0_10px_40px_-15px_rgba(25,21,16,0.6)]"
+          className="bg-ink rounded-b-3xl px-8 py-3 flex items-center gap-8 lg:gap-10 shadow-[0_10px_40px_-15px_rgba(25,21,16,0.6)]"
         >
           {links.map((l) => (
             <a
@@ -87,7 +88,7 @@ export default function Navbar() {
             <div className="flex flex-col h-full p-5">
               <div className="flex items-center justify-between">
                 <span className="text-lg font-extrabold text-ink tracking-tight">
-                  COMFORT&nbsp;36<span className="text-primary">*</span>
+                  COMFORT&nbsp;36
                 </span>
                 <button
                   onClick={() => setOpen(false)}
@@ -140,7 +141,7 @@ export default function Navbar() {
                   <Phone className="w-4 h-4 text-primary" />
                   {contacts.phone}
                 </a>
-                <p className="text-center text-xs text-muted pt-1">{contacts.address}</p>
+                <p className="text-center text-xs text-muted pt-1">{contacts.addressShort}</p>
               </motion.div>
             </div>
           </motion.div>

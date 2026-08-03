@@ -8,10 +8,10 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <div className="text-2xl md:text-3xl font-extrabold text-ink tracking-tight">
-              COMFORT&nbsp;36<span className="text-primary">*</span>
+              COMFORT&nbsp;36
             </div>
             <p className="mt-2 text-xs text-muted max-w-sm leading-relaxed">
-              * Грузовое ателье полного цикла. Индивидуальный пошив по 3D-лекалам. Воронеж, с 2019
+              Грузовое ателье полного цикла. Индивидуальный пошив по 3D-лекалам. Воронеж, с 2019
               года. Отправляем по всему миру.
             </p>
           </div>
@@ -61,9 +61,7 @@ export default function Footer() {
             </span>
             <ArrowUpRight className="w-3.5 h-3.5 text-primary transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
-          <span className="text-[11px] text-muted/70">
-            Изображения и видео созданы в Higgsfield (Nano Banana Pro, Kling 3.0)
-          </span>
+          <span className="text-[11px] text-muted/70">Политика конфиденциальности</span>
         </div>
       </div>
     </footer>

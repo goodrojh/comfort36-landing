@@ -8,13 +8,11 @@ export function WordsPullUp({
   text,
   className = '',
   wordClassName = '',
-  showAsterisk = false,
   delay = 0,
 }: {
   text: string
   className?: string
   wordClassName?: string
-  showAsterisk?: boolean
   delay?: number
 }) {
   const words = text.split(' ')
@@ -25,25 +23,15 @@ export function WordsPullUp({
     <span ref={ref} className={`inline-flex flex-wrap ${className}`}>
       {words.map((word, i) => {
         const isLast = i === words.length - 1
-        const asterisk = isLast && showAsterisk
         return (
-          <span
-            key={`${word}-${i}`}
-            // запас справа, чтобы overflow-hidden не срезал звёздочку
-            className={`overflow-hidden inline-block pb-[0.06em] ${asterisk ? 'pr-[0.4em]' : ''}`}
-          >
+          <span key={`${word}-${i}`} className="overflow-hidden inline-block pb-[0.06em]">
             <motion.span
               initial={{ y: 20, opacity: 0 }}
               animate={inView ? { y: 0, opacity: 1 } : {}}
               transition={{ duration: 0.8, delay: delay + i * 0.08, ease: EASE }}
-              className={`inline-block relative ${wordClassName}`}
+              className={`inline-block ${wordClassName}`}
             >
               {word}
-              {asterisk && (
-                <span className="absolute top-[0.08em] -right-[0.3em] text-[0.28em] text-primary">
-                  *
-                </span>
-              )}
               {!isLast && <span>&nbsp;</span>}
             </motion.span>
           </span>

@@ -65,13 +65,11 @@ export default function Contact() {
 
           <FadeUp delay={0.25}>
             <a
-              href={contacts.mapHref}
-              target="_blank"
-              rel="noreferrer"
+              href="#map"
               className="mt-10 md:mt-14 inline-flex items-center gap-2.5 text-cream/70 hover:text-cream text-xs sm:text-sm transition-colors"
             >
               <MapPin className="w-4 h-4 text-primarysoft" />
-              {contacts.address} — приезжайте посмотреть материал вживую
+              {contacts.addressShort} — приезжайте посмотреть материал вживую
             </a>
           </FadeUp>
         </div>

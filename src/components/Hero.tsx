@@ -64,7 +64,7 @@ export default function Hero() {
                 className="text-[16.5vw] sm:text-[15vw] md:text-[13.5vw] lg:text-[13vw] font-extrabold leading-[0.84] tracking-[-0.05em] text-ink"
                 aria-label="COMFORT 36"
               >
-                <WordsPullUp text="COMFORT 36" showAsterisk />
+                <WordsPullUp text="COMFORT 36" />
               </h1>
             </div>
 
@@ -112,7 +112,7 @@ export default function Hero() {
             transition={{ duration: 1, delay: 1.2 }}
             className="mt-3 md:mt-5 pt-3 md:pt-4 border-t border-ink/15 flex flex-wrap gap-x-4 gap-y-1 text-[9px] sm:text-[10px] md:text-xs uppercase tracking-[0.12em] text-graphite/80"
           >
-            <span>* лекала под 40+ моделей</span>
+            <span>Лекала под 40+ моделей</span>
             <span>Пошив 5 дней</span>
             <span>Гарантия посадки</span>
             <span className="hidden sm:inline">Отправка по всему миру</span>
