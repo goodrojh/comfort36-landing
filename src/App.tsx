@@ -10,6 +10,8 @@ import Reviews from './components/Reviews'
 import Faq from './components/Faq'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
+import FloatingContacts from './components/FloatingContacts'
+import PromoModal from './components/PromoModal'
 
 export default function App() {
   return (
@@ -26,6 +28,8 @@ export default function App() {
       <Faq />
       <Contact />
       <Footer />
+      <FloatingContacts />
+      <PromoModal />
     </main>
   )
 }

@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { ArrowRight, Check } from 'lucide-react'
 import { WordsPullUpMultiStyle } from './anim'
+import BgMedia from './BgMedia'
 import { media, contacts } from '../media'
 
 type Card = {
@@ -77,23 +78,11 @@ export default function Process() {
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             className="relative rounded-[1.25rem] overflow-hidden bg-sand min-h-[320px] lg:min-h-0"
           >
-            {media.stitchVideo ? (
-              <video
-                className="absolute inset-0 w-full h-full object-cover"
-                src={media.stitchVideo}
-                poster={media.stitchMacro}
-                autoPlay
-                loop
-                muted
-                playsInline
-              />
-            ) : (
-              <img
-                className="absolute inset-0 w-full h-full object-cover"
-                src={media.stitchMacro}
-                alt="Макросъёмка стёжки по экокоже"
-              />
-            )}
+            <BgMedia
+              video={media.stitchVideo}
+              poster={media.stitchMacro}
+              alt="Макросъёмка стёжки по экокоже"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/10 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-5 md:p-6">
               <div className="text-[10px] uppercase tracking-[0.18em] text-cream/70 mb-1.5">

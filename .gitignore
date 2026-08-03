@@ -4,3 +4,6 @@ dist
 *.local
 .vite
 .claude
+
+# workflow нельзя запушить без scope "workflow" у токена gh
+.github/
