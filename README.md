@@ -46,3 +46,20 @@ npm run dev
 ```
 
 Сборка: `npm run build` (для GitHub Pages — с `BASE_PATH=/comfort36-landing/`).
+
+## Деплой
+
+```bash
+npm run deploy
+```
+
+Скрипт собирает проект с нужным `base` и выкладывает `dist/` в ветку `gh-pages`, откуда раздаётся Pages.
+
+Автодеплой через GitHub Actions лежит в `.github/workflows/deploy.yml`, но не запушен: текущему токену `gh` не хватает скоупа `workflow`. Чтобы включить CI:
+
+```bash
+gh auth refresh -s workflow
+git add .github && git commit -m "CI: автодеплой на GitHub Pages" && git push
+```
+
+После этого в настройках репозитория переключите Pages на источник **GitHub Actions**.
