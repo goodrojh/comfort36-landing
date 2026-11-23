@@ -1,6 +1,9 @@
 const SHEET = 'Лиды'
 const CONTACT_SHEET = 'Заявки с сайта'
+const GITHUB_SHEET = 'Заявки GitHub'
+const GITHUB_CHANNELS = ['Первый экран сайта', 'Корзина', 'Подбор комплекта']
 const UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']
+const GITHUB_HEADERS = ['Дата (МСК)', 'Источник', 'Имя', 'Телефон', 'Комментарий', 'Состав заявки', ...UTM, 'ID события', 'Telegram']
 const HEADERS = ['Дата (МСК)', 'Канал', ...UTM, 'ID события']
 const CONTACT_HEADERS = ['Дата (МСК)', 'Канал', 'Имя', 'Телефон', 'Комментарий', 'Состав заявки', ...UTM, 'ID события', 'Обновлено (МСК)']
 const CHANNELS = ['Первый экран сайта', 'Корзина сайта', 'Подбор комплекта', 'Первый экран → ВК', 'Корзина сайта → ВК', 'Конфигуратор → ВК', 'ВК Маркет']
@@ -17,7 +20,7 @@ function prepareSheet(book, name, headers) {
   sheet.setColumnWidth(1, 125)
   sheet.setColumnWidth(2, 205)
   sheet.setColumnWidths(3, headers.length - 2, 145)
-  if (name === CONTACT_SHEET) sheet.setColumnWidths(5, 2, 300)
+  if (name === CONTACT_SHEET || name === GITHUB_SHEET) sheet.setColumnWidths(5, 2, 300)
   sheet.getRange(2, 1, sheet.getMaxRows() - 1, headers.length).setNumberFormat('@')
   if (!sheet.getFilter()) sheet.getRange(1, 1, sheet.getMaxRows(), headers.length).createFilter()
   sheet.hideColumns(headers.indexOf('ID события') + 1)
@@ -31,6 +34,7 @@ function setupComfort36() {
   props.setProperty('SPREADSHEET_ID', book.getId())
   prepareSheet(book, SHEET, HEADERS)
   if (props.getProperty('ALLOW_CONTACT_DATA') === 'true') prepareSheet(book, CONTACT_SHEET, CONTACT_HEADERS)
+  if (props.getProperty('FORMSUBMIT_PREVIEW') === 'true') prepareSheet(book, GITHUB_SHEET, GITHUB_HEADERS)
 }
 
 function testComfort36() {
@@ -70,6 +74,122 @@ function findRow(sheet, idColumn, id) {
   return cell ? cell.getRow() : 0
 }
 
+function telegramApi(props, method, fields) {
+  const token = props.getProperty('TELEGRAM_BOT_TOKEN')
+  if (!token || !/^[1-9]\d*:[A-Za-z0-9_-]{20,}$/.test(token)) {
+    throw new Error('Добавьте токен бота в свойство TELEGRAM_BOT_TOKEN.')
+  }
+  let result
+  try {
+    const response = UrlFetchApp.fetch('https://api.telegram.org/bot' + token + '/' + method, {
+      method: 'post', contentType: 'application/json', payload: JSON.stringify(fields), muteHttpExceptions: true,
+    })
+    result = JSON.parse(response.getContentText())
+  } catch {
+    throw new Error('Telegram API временно недоступен.')
+  }
+  if (result.ok !== true) throw new Error('Telegram API отклонил запрос (' + Number(result.error_code || 0) + ').')
+  return result.result
+}
+
+function connectTelegram() {
+  const props = PropertiesService.getScriptProperties()
+  const code = props.getProperty('TELEGRAM_CONNECT_CODE')?.trim()
+  if (!code || code.length < 8) throw new Error('Добавьте свой код из сообщения боту в TELEGRAM_CONNECT_CODE.')
+  const updates = telegramApi(props, 'getUpdates', { limit: 100, timeout: 0, allowed_updates: ['message'] })
+  const chats = [...new Set(updates.flatMap(update =>
+    update.message?.chat?.type === 'private' && update.message.text?.trim() === code
+      ? [String(update.message.chat.id)] : [],
+  ))]
+  if (chats.length !== 1) throw new Error('Откройте личный чат с ботом и отправьте код из TELEGRAM_CONNECT_CODE, затем повторите.')
+  telegramApi(props, 'sendMessage', { chat_id: chats[0], text: 'COMFORT 36 · Telegram подключён. Это тестовое уведомление.' })
+  props.setProperty('TELEGRAM_CHAT_ID', chats[0])
+  props.deleteProperty('TELEGRAM_CONNECT_CODE')
+}
+
+function receiveGitHubPreview(data, props) {
+  if (props.getProperty('FORMSUBMIT_PREVIEW') !== 'true') return false
+  const id = data['ID заявки']
+  const source = data['Источник']
+  const name = data['Имя']
+  const phone = data['Телефон']
+  const description = data['Комментарий'] ?? ''
+  const order = data['Состав заявки'] ?? ''
+  const correction = data['ID исходной заявки']
+  if (typeof id !== 'string' || !ID.test(id) || !GITHUB_CHANNELS.includes(source) ||
+      typeof name !== 'string' || !name.trim() || name.length > 80 ||
+      typeof phone !== 'string' || !/^\+?[\d ()-]+$/.test(phone) || !/^\d{10,15}$/.test(phone.replace(/\D/g, '')) ||
+      typeof description !== 'string' || description.length > 500 || typeof order !== 'string' || order.length > 2600 ||
+      (correction !== undefined && (typeof correction !== 'string' || !ID.test(correction) || correction === id))) return false
+
+  const lock = LockService.getScriptLock()
+  lock.waitLock(5000)
+  try {
+    const book = SpreadsheetApp.openById(props.getProperty('SPREADSHEET_ID'))
+    const sheet = book.getSheetByName(GITHUB_SHEET)
+    if (!sheet) return false
+    const idColumn = GITHUB_HEADERS.indexOf('ID события') + 1
+    const statusColumn = GITHUB_HEADERS.length
+    let row = findRow(sheet, idColumn, id)
+    if (row && sheet.getRange(row, statusColumn).getValue() === 'Отправлено') return true
+
+    const bucket = String(Math.floor(Date.now() / 3600000))
+    const saved = (props.getProperty('GITHUB_HOUR_LIMIT') || '').split(':')
+    const used = saved[0] === bucket ? Number(saved[1]) : 0
+    if (used >= 20) return false
+    props.setProperty('GITHUB_HOUR_LIMIT', bucket + ':' + (used + 1))
+
+    if (!row) {
+      const tags = UTM.map(field => {
+        const value = data[field]
+        return typeof value === 'string' && /^[\p{L}\p{N}_. -]{1,80}$/u.test(value) && !/\d{8}/.test(value) ? textCell(value) : ''
+      })
+      const timestamp = Utilities.formatDate(new Date(), 'Europe/Moscow', 'yyyy-MM-dd HH:mm:ss')
+      sheet.appendRow([textCell(timestamp), source, textCell(name), textCell(phone), textCell(description), textCell(order), ...tags, id, 'Ожидает отправки'])
+      SpreadsheetApp.flush()
+      row = sheet.getLastRow()
+    }
+
+    const linkedChat = props.getProperty('TELEGRAM_CHAT_ID')
+    if (!linkedChat) {
+      sheet.getRange(row, statusColumn).setValue('Чат не подключён')
+      return false
+    }
+    const title = correction ? 'Исправление заявки № ' + correction.slice(0, 8).toUpperCase()
+      : 'Новая тестовая заявка № ' + id.slice(0, 8).toUpperCase()
+    const message = [
+      'COMFORT 36 · ' + title, source,
+      'Имя: ' + name, 'Телефон: ' + phone,
+      description && 'Комментарий: ' + description, order,
+    ].filter(Boolean).join('\n')
+    try {
+      telegramApi(props, 'sendMessage', {
+        chat_id: linkedChat, text: message,
+        link_preview_options: { is_disabled: true }, protect_content: true,
+      })
+      sheet.getRange(row, statusColumn).setValue('Отправлено')
+      return true
+    } catch {
+      sheet.getRange(row, statusColumn).setValue('Ошибка Telegram')
+      return false
+    }
+  } finally {
+    SpreadsheetApp.flush()
+    lock.releaseLock()
+  }
+}
+
+function testGitHubDelivery() {
+  const props = PropertiesService.getScriptProperties()
+  const sent = receiveGitHubPreview({
+    'ID заявки': Utilities.getUuid(), 'Источник': 'Первый экран сайта',
+    'Имя': 'Тест COMFORT 36', 'Телефон': '+7 900 000 00 00',
+    'Комментарий': 'Проверка Google Таблицы и Telegram', 'Состав заявки': 'Демонстрационный комплект',
+    utm_source: 'github', utm_medium: 'test', utm_campaign: 'comfort36_preview',
+  }, props)
+  if (!sent) throw new Error('Проверьте настройки и колонку Telegram на листе «Заявки GitHub».')
+}
+
 function doPost(e) {
   const reply = ok => ContentService.createTextOutput(JSON.stringify({ ok })).setMimeType(ContentService.MimeType.JSON)
   const props = PropertiesService.getScriptProperties()
@@ -80,6 +200,9 @@ function doPost(e) {
     data = JSON.parse(body)
   } catch {
     return reply(false)
+  }
+  if (data?.form_data && typeof data.form_data === 'object') {
+    return reply(receiveGitHubPreview(data.form_data, props))
   }
   const key = props.getProperty('SHEETS_KEY')
   if (!key || key !== data?.key || (typeof data.id !== 'string' || !ID.test(data.id)) || !/^\d{4}-\d{2}-\d{2}$/.test(data.date) ||

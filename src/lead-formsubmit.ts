@@ -1,6 +1,9 @@
 import { getAttribution } from './attribution'
 import type { LeadDetails, LeadSource } from './lead-draft'
 
+const googleScript = import.meta.env.VITE_FORMSUBMIT_WEBHOOK_URL?.trim() ?? ''
+const validGoogleScript = /^https:\/\/script\.google\.com\/(?:a\/macros\/[a-z0-9.-]+\/|macros\/)s\/[a-z0-9_-]+\/exec$/i.test(googleScript)
+
 const formId = import.meta.env.VITE_FORMSUBMIT_FORM_ID?.trim() ?? ''
 const publicRecipient = import.meta.env.VITE_FORMSUBMIT_PUBLIC_RECIPIENT?.trim() ?? ''
 const destination = /^[a-z0-9_-]{16,128}$/i.test(formId)
@@ -33,6 +36,11 @@ export async function sendFormEmail(id: string, lead: EmailLead) {
     'Телефон': lead.phone,
     'Комментарий': lead.description,
   })
+  if (validGoogleScript) {
+    payload.set('_webhook', googleScript)
+    payload.set('ID заявки', id)
+    if (lead.correctionOf) payload.set('ID исходной заявки', lead.correctionOf)
+  }
   if (lead.order) payload.set('Состав заявки', lead.order)
   if (lead.correctionOf) payload.set('Исходная заявка', lead.correctionOf.slice(0, 8).toUpperCase())
   for (const [field, value] of Object.entries(getAttribution())) {
