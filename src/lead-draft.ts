@@ -1,6 +1,6 @@
 export type LeadSource = 'hero' | 'cart' | 'config'
 export type LeadDetails = { name: string; phone: string; description: string }
-export type LeadDraft = LeadDetails & { source: LeadSource; order?: string; createdAt: number; receipt: string }
+export type LeadDraft = LeadDetails & { source: LeadSource; order?: string; createdAt: number; receipt: string; preview?: boolean }
 
 const key = 'comfort36:lead-draft:v1'
 const lifetime = 30 * 60 * 1000

@@ -19,7 +19,7 @@ import VideoGallery from './VideoGallery'
 import { useCart } from './cart'
 import { contacts } from './media'
 import { getAttribution } from './attribution'
-import { directLeads } from './lead-api'
+import { directLeads, emailPreview } from './lead-api'
 
 const home = import.meta.env.BASE_URL
 const isCart = location.pathname.endsWith('/cart.html')
@@ -47,7 +47,7 @@ function Privacy() {
     <a href={home} className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink underline underline-offset-4">← На главную</a>
     <h1 className="my-5 text-2xl sm:text-4xl md:text-5xl font-extrabold leading-tight text-ink [overflow-wrap:anywhere]">Конфиденциальность</h1>
     {operatorDetails && <p>Оператор персональных данных — {operatorDetails}.</p>}
-    {directLeads ? <>
+    {emailPreview ? <p>При отправке тестовой формы введённые сведения передаются через FormSubmit на тестовую почту. Для проверки используйте тестовые контакты.</p> : directLeads ? <>
       <p>При отправке формы сервер приёма заявок в России получает ваше имя, номер телефона, комментарий и состав заявки. Ателье использует эти сведения, чтобы ответить, подобрать комплект и согласовать заказ. Сведения получают сотрудники автоателье через рабочий канал связи.</p>
       <p>Отправленные сообщения удаляются из очереди. На сервере запись заявки хранится до семи дней, чтобы повторить доставку при сбое и принять исправления. Копия заявки временно доступна в текущей вкладке для проверки контактов. Вопросы об обработке можно направить в сообщения сообщества.</p>
       {externalContactDestinations && <p>Имя, телефон, комментарий и состав заявки передаются в {externalContactDestinations} для ведения заявок.</p>}
@@ -62,7 +62,7 @@ function Consent() {
     <a href={home} className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink underline underline-offset-4">← На главную</a>
     <h1 className="my-5 text-2xl sm:text-4xl md:text-5xl font-extrabold leading-tight text-ink [overflow-wrap:anywhere]">Согласие на обработку персональных данных</h1>
     {operatorDetails && <p>Оператор персональных данных — {operatorDetails}.</p>}
-    {directLeads ? <>
+    {emailPreview ? <p>При отправке тестовой формы введённые сведения передаются через FormSubmit на тестовую почту. Для проверки используйте тестовые контакты.</p> : directLeads ? <>
       <p>Я даю автоателье «Комфорт 36» согласие на получение, хранение и обработку имени, телефона, комментария и состава заявки, которые я отправляю через форму сайта. Сведения используются для связи со мной, подбора комплекта и согласования заказа. Ателье получает заявку через свой рабочий канал связи.</p>
       {externalContactDestinations && <p>Я также соглашаюсь на передачу сведений из заявки в {externalContactDestinations} автоателье для ведения заявок.</p>}
       <p>Согласие действует до обработки обращения или до отзыва. Для отзыва я могу написать в сообщество автоателье.</p>

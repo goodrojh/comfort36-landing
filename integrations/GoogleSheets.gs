@@ -33,6 +33,31 @@ function setupComfort36() {
   if (props.getProperty('ALLOW_CONTACT_DATA') === 'true') prepareSheet(book, CONTACT_SHEET, CONTACT_HEADERS)
 }
 
+function testComfort36() {
+  const props = PropertiesService.getScriptProperties()
+  const key = props.getProperty('SHEETS_KEY')
+  if (!key || !props.getProperty('SPREADSHEET_ID')) {
+    throw new Error('Сначала задайте SHEETS_KEY и запустите setupComfort36.')
+  }
+  const sample = {
+    key,
+    id: Utilities.getUuid(),
+    date: Utilities.formatDate(new Date(), 'Europe/Moscow', 'yyyy-MM-dd'),
+    channel: 'Первый экран сайта',
+    utm: { utm_source: 'github', utm_medium: 'test', utm_campaign: 'comfort36_preview' },
+  }
+  if (props.getProperty('ALLOW_CONTACT_DATA') === 'true') {
+    sample.lead = {
+      name: 'Тест COMFORT 36',
+      phone: '+7 900 000 00 00',
+      description: 'Проверка Google Таблицы',
+      order: 'Демонстрационный комплект',
+    }
+  }
+  const response = doPost({ postData: { contents: JSON.stringify(sample) } })
+  if (!JSON.parse(response.getContent()).ok) throw new Error('Проверьте настройки и повторите setupComfort36.')
+}
+
 function textCell(value) {
   // Force plain text, including Russian phone numbers beginning with "+" and pasted formulas.
   return typeof value === 'string' && value !== '' ? "'" + value : ''

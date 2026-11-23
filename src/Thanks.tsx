@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { CircleCheck, ClipboardList, Pencil } from 'lucide-react'
 import CheckoutFrame, { checkoutPanel, outlineButton } from './CheckoutFrame'
 import { getLeadDetails, leadButton, LeadFields } from './LeadForm'
-import { directLeads, useLeadRequest } from './lead-api'
+import { directLeads, emailPreview, useLeadRequest } from './lead-api'
 import { readLeadDraft, saveLeadDraft } from './lead-draft'
 import { contacts } from './media'
 import ContactLinks from './components/ContactLinks'
@@ -12,9 +12,10 @@ export default function Thanks({ count }: { count: number }) {
   const [editing, setEditing] = useState(false)
   const [notice, setNotice] = useState('')
   const { send, sending, error } = useLeadRequest()
+  const canEdit = directLeads && Boolean(draft?.preview) === emailPreview
   async function edit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (!draft) return
+    if (!draft || !canEdit) return
     const details = getLeadDetails(event.currentTarget)
     if (!details) return
     const updated = { ...draft, ...details, createdAt: Date.now() }
@@ -22,11 +23,13 @@ export default function Thanks({ count }: { count: number }) {
     saveLeadDraft(updated)
     setDraft(updated)
     setEditing(false)
-    setNotice('Исправления отправлены.')
+    setNotice(draft.preview ? 'Тестовое исправление отправлено.' : 'Исправления отправлены.')
   }
 
   return <CheckoutFrame count={count} title={draft ? 'Спасибо за заявку!' : 'Ваша заявка'}
-    description={draft ? 'Менеджер скоро свяжется с вами по указанному номеру.' : 'Оставьте заявку на главной странице или в корзине.'}
+    description={draft
+      ? (draft.preview ? 'Тестовая заявка отправлена. Проверьте почту.' : 'Менеджер скоро свяжется с вами по указанному номеру.')
+      : 'Оставьте заявку на главной странице или в корзине.'}
     icon={draft ? <CircleCheck size={36} /> : <ClipboardList size={36} />}>
     {draft && <div className="mt-4 grid items-start gap-4 md:mt-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-5">
       <section className={checkoutPanel}>
@@ -47,7 +50,7 @@ export default function Thanks({ count }: { count: number }) {
             <div className="min-w-0 rounded-xl bg-sand p-3"><dt className="text-xs font-bold text-graphite">Телефон</dt><dd className="mt-1 break-words font-semibold">{draft.phone}</dd></div>
             {draft.description && <div className="min-w-0 rounded-xl bg-sand p-3 sm:col-span-2"><dt className="text-xs font-bold text-graphite">Комментарий</dt><dd className="mt-1 whitespace-pre-wrap break-words">{draft.description}</dd></div>}
           </dl>
-          {directLeads && <button className={`${outlineButton} mt-4`} type="button"
+          {canEdit && <button className={`${outlineButton} mt-4`} type="button"
             onClick={() => { setNotice(''); setEditing(true) }}><Pencil size={16} /> Исправить данные</button>}
         </>}
         {draft.order && <section className="mt-5 border-t border-ink/10 pt-4">

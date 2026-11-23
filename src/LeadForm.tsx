@@ -2,7 +2,7 @@ import { useId, useState, type FormEvent } from 'react'
 import { contacts } from './media'
 import ContactLinks from './components/ContactLinks'
 import { ArrowUpRight } from 'lucide-react'
-import { directLeads, useLeadRequest } from './lead-api'
+import { directLeads, emailPreview, useLeadRequest } from './lead-api'
 import { saveLeadDraft, thanksUrl, type LeadDetails, type LeadSource } from './lead-draft'
 
 
@@ -69,11 +69,12 @@ export default function LeadForm({ order, source, compact = false }: { order?: s
     const receipt = await send(draft)
     if (!receipt) return
 
-    if (saveLeadDraft({ ...draft, receipt })) {
+    if (saveLeadDraft({ ...draft, receipt, preview: emailPreview || undefined })) {
       location.assign(thanksUrl)
     } else {
       setAccepted(true)
-      setMessage('Спасибо за заявку! Менеджер скоро свяжется с вами по указанному номеру.')
+      setMessage(emailPreview ? 'Тестовая заявка отправлена. Проверьте почту.'
+        : 'Спасибо за заявку! Менеджер скоро свяжется с вами по указанному номеру.')
     }
   }
 
@@ -87,6 +88,9 @@ export default function LeadForm({ order, source, compact = false }: { order?: s
       <ContactLinks />
     </div> : <form className={hero ? 'mt-4 grid gap-3.5' : 'mt-3 grid gap-3'} onSubmit={submit}>
       <fieldset className="grid min-w-0 gap-3" disabled={sending || accepted}>
+        {emailPreview && <p className="rounded-xl bg-sand p-3 text-xs font-semibold text-ink">
+          Тестовая форма. Для проверки укажите тестовые контакты.
+        </p>}
         <LeadFields compact={compact} stacked={hero} />
         <div className="text-xs leading-snug text-graphite">
           <label className="flex items-start gap-2 cursor-pointer">
