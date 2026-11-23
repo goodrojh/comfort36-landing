@@ -95,9 +95,9 @@ export default function App() {
       : isConsent ? <Consent />
       : <main>
         <Hero count={cart.count} />
+        <Products onAdd={cart.change} />
         <Marquee />
         <Offer />
-        <Products onAdd={cart.change} />
         <Process />
         <Configurator />
         <VideoGallery />

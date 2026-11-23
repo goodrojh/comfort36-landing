@@ -50,14 +50,14 @@ export default function Footer() {
 
         <div className="mt-8 pt-6 border-t border-ink/[0.07] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <a
-            href="https://lendingsfera.ru"
+            href="https://odinpotok.ru/"
             target="_blank"
             rel="noreferrer"
             className="group inline-flex items-center gap-2 text-xs text-muted hover:text-ink transition-colors"
           >
             Сайт разработан студией
             <span className="font-bold text-ink border-b border-primary/60 group-hover:border-primary transition-colors">
-              ЛендингСфера
+              ОдинПоток
             </span>
             <ArrowUpRight className="w-3.5 h-3.5 text-primary transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
