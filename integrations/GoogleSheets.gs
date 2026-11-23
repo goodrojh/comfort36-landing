@@ -1,11 +1,10 @@
 const SHEET = 'Лиды'
 const CONTACT_SHEET = 'Заявки с сайта'
-const GITHUB_SHEET = 'Заявки GitHub'
-const GITHUB_CHANNELS = ['Первый экран сайта', 'Корзина', 'Подбор комплекта']
+const OLD_INBOX = 'Заявки GitHub'
+const SITE_CHANNELS = ['Первый экран сайта', 'Корзина', 'Подбор комплекта']
 const UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']
-const GITHUB_HEADERS = ['Дата (МСК)', 'Источник', 'Имя', 'Телефон', 'Комментарий', 'Состав заявки', ...UTM, 'ID события', 'Telegram']
+const INBOX_HEADERS = ['Дата (МСК)', 'Источник', 'Имя', 'Телефон', 'Комментарий', 'Состав заявки', ...UTM, 'ID события', 'Telegram', 'Почта', 'Исходная заявка', 'Обновлено (МСК)']
 const HEADERS = ['Дата (МСК)', 'Канал', ...UTM, 'ID события']
-const CONTACT_HEADERS = ['Дата (МСК)', 'Канал', 'Имя', 'Телефон', 'Комментарий', 'Состав заявки', ...UTM, 'ID события', 'Обновлено (МСК)']
 const CHANNELS = ['Первый экран сайта', 'Корзина сайта', 'Подбор комплекта', 'Первый экран → ВК', 'Корзина сайта → ВК', 'Конфигуратор → ВК', 'ВК Маркет']
 const ID = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/
 
@@ -20,11 +19,42 @@ function prepareSheet(book, name, headers) {
   sheet.setColumnWidth(1, 125)
   sheet.setColumnWidth(2, 205)
   sheet.setColumnWidths(3, headers.length - 2, 145)
-  if (name === CONTACT_SHEET || name === GITHUB_SHEET) sheet.setColumnWidths(5, 2, 300)
+  if (name === SHEET) sheet.setColumnWidths(5, 2, 300)
   sheet.getRange(2, 1, sheet.getMaxRows() - 1, headers.length).setNumberFormat('@')
   if (!sheet.getFilter()) sheet.getRange(1, 1, sheet.getMaxRows(), headers.length).createFilter()
   sheet.hideColumns(headers.indexOf('ID события') + 1)
   return sheet
+}
+
+function prepareInbox(book) {
+  const existing = book.getSheetByName(SHEET)
+  if (existing && existing.getLastRow() &&
+      existing.getRange(1, 1, 1, HEADERS.length).getValues()[0].join('|') === HEADERS.join('|')) {
+    // Keep the existing sheet ID and shift the historical UTM and event IDs together.
+    if (existing.getFilter()) existing.getFilter().remove()
+    existing.insertColumnsAfter(2, 4)
+    existing.getRange(1, 1, 1, INBOX_HEADERS.length).setValues([INBOX_HEADERS])
+  }
+  const inbox = prepareSheet(book, SHEET, INBOX_HEADERS)
+  const count = inbox.getLastRow() - 1
+  const known = new Set(count ? inbox.getRange(2, 12, count, 1).getDisplayValues().flat() : [])
+  for (const name of [OLD_INBOX, CONTACT_SHEET]) {
+    const old = book.getSheetByName(name)
+    if (!old || old.getLastRow() < 2) continue
+    const rows = old.getRange(2, 1, old.getLastRow() - 1, 15).getDisplayValues()
+    const additions = []
+    for (const row of rows) {
+      if (!ID.test(row[11]) || known.has(row[11])) continue
+      known.add(row[11])
+      const values = name === OLD_INBOX ? [...row, ''] : [...row.slice(0, 12), '', '', '', row[12]]
+      additions.push(values.map(textCell))
+    }
+    if (additions.length) {
+      const end = inbox.getLastRow()
+      if (end + additions.length > inbox.getMaxRows()) inbox.insertRowsAfter(inbox.getMaxRows(), end + additions.length - inbox.getMaxRows())
+      inbox.getRange(end + 1, 1, additions.length, INBOX_HEADERS.length).setValues(additions)
+    }
+  }
 }
 
 function setupComfort36() {
@@ -32,10 +62,14 @@ function setupComfort36() {
   if (!book) throw new Error('Откройте Apps Script из целевой таблицы')
   const props = PropertiesService.getScriptProperties()
   props.setProperty('SPREADSHEET_ID', book.getId())
-  prepareSheet(book, SHEET, HEADERS)
-  if (props.getProperty('ALLOW_CONTACT_DATA') === 'true') prepareSheet(book, CONTACT_SHEET, CONTACT_HEADERS)
-  const inbox = prepareSheet(book, GITHUB_SHEET, GITHUB_HEADERS)
-  inbox.getRange(1, 14, 1, 2).setValues([['Почта', 'Исходная заявка']])
+  const lock = LockService.getScriptLock()
+  lock.waitLock(30000)
+  try {
+    prepareInbox(book)
+    SpreadsheetApp.flush()
+  } finally {
+    lock.releaseLock()
+  }
   MailApp.getRemainingDailyQuota()
   if (!ScriptApp.getProjectTriggers().some(trigger => trigger.getHandlerFunction() === 'deliverPending')) {
     ScriptApp.newTrigger('deliverPending').timeBased().everyMinutes(1).create()
@@ -120,7 +154,7 @@ function receiveSiteLead(data, props) {
   const description = data['Комментарий'] ?? ''
   const order = data['Состав заявки'] ?? ''
   const correction = data['ID исходной заявки']
-  if (typeof id !== 'string' || !ID.test(id) || !GITHUB_CHANNELS.includes(source) ||
+  if (typeof id !== 'string' || !ID.test(id) || !SITE_CHANNELS.includes(source) ||
       typeof name !== 'string' || !name.trim() || name.length > 80 ||
       typeof phone !== 'string' || !/^\+?[\d ()-]+$/.test(phone) || !/^\d{10,15}$/.test(phone.replace(/\D/g, '')) ||
       typeof description !== 'string' || description.length > 500 || typeof order !== 'string' || order.length > 2600 ||
@@ -130,9 +164,9 @@ function receiveSiteLead(data, props) {
   lock.waitLock(5000)
   try {
     const book = SpreadsheetApp.openById(props.getProperty('SPREADSHEET_ID'))
-    const sheet = book.getSheetByName(GITHUB_SHEET)
+    const sheet = book.getSheetByName(SHEET)
     if (!sheet) return false
-    const idColumn = GITHUB_HEADERS.indexOf('ID события') + 1
+    const idColumn = INBOX_HEADERS.indexOf('ID события') + 1
     if (findRow(sheet, idColumn, id)) return true
 
     const bucket = String(Math.floor(Date.now() / 3600000))
@@ -194,7 +228,7 @@ function deliverNotifications(id) {
   const lock = LockService.getUserLock()
   if (!lock.tryLock(1000)) return
   try {
-    const sheet = SpreadsheetApp.openById(props.getProperty('SPREADSHEET_ID')).getSheetByName(GITHUB_SHEET)
+    const sheet = SpreadsheetApp.openById(props.getProperty('SPREADSHEET_ID')).getSheetByName(SHEET)
     const first = id ? findRow(sheet, 12, id) : 2
     const count = id ? 1 : sheet.getLastRow() - 1
     if (!first || count < 1) return
@@ -266,21 +300,20 @@ function doPost(e) {
   lock.waitLock(5000)
   try {
     const book = SpreadsheetApp.openById(props.getProperty('SPREADSHEET_ID'))
-    const sheet = book.getSheetByName(withContactData ? CONTACT_SHEET : SHEET)
-    const heads = withContactData ? CONTACT_HEADERS : HEADERS
+    const sheet = book.getSheetByName(SHEET)
     if (!sheet) return reply(false)
-    const idColumn = heads.indexOf('ID события') + 1
+    const idColumn = INBOX_HEADERS.indexOf('ID события') + 1
     const date = textCell(data.date)
     const updated = textCell(Utilities.formatDate(new Date(), 'Europe/Moscow', 'yyyy-MM-dd HH:mm:ss'))
     if (correction) {
       const row = findRow(sheet, idColumn, correction)
       if (!row) return reply(false)
       sheet.getRange(row, 3, 1, 3).setValues([[textCell(lead.name), textCell(lead.phone), textCell(lead.description)]])
-      sheet.getRange(row, CONTACT_HEADERS.length).setValue(updated)
+      sheet.getRange(row, INBOX_HEADERS.length).setValue(updated)
     } else if (!findRow(sheet, idColumn, data.id)) {
       sheet.appendRow(withContactData
-        ? [date, data.channel, textCell(lead.name), textCell(lead.phone), textCell(lead.description), textCell(lead.order), ...tags, data.id, updated]
-        : [date, data.channel, ...tags, data.id])
+        ? [date, data.channel, textCell(lead.name), textCell(lead.phone), textCell(lead.description), textCell(lead.order), ...tags, data.id, '', '', '', updated]
+        : [date, data.channel, '', '', '', '', ...tags, data.id])
     }
     SpreadsheetApp.flush()
     return reply(true)

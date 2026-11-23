@@ -8,7 +8,7 @@ import type { useCart } from './cart'
 export default function CartPage({ cart }: { cart: ReturnType<typeof useCart> }) {
   const order = cart.items.map(({ product, count }) =>
     `• ${product.title} (${product.kind}, ${product.color}) × ${count} — ${money(product.price * count)}`,
-  ).concat(`Товары: ${money(cart.total)}. Доставку прошу рассчитать отдельно.`).join('\n')
+  ).concat(`Товары: ${money(cart.total)}`).join('\n')
   const empty = cart.count === 0
 
   return <CheckoutFrame count={cart.count} title="Корзина" icon={<ShoppingCart size={34} />}
