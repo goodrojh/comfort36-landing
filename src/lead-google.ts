@@ -31,4 +31,7 @@ export async function sendGoogleLead(id: string, lead: EmailLead) {
     signal: AbortSignal.timeout(45000),
   })
   if (!response.ok || (await response.json()).ok !== true) throw new Error('Missing receipt')
+  // The scheduled worker covers a closed tab or an interrupted notification request.
+  void fetch(endpoint, { method: 'POST', credentials: 'omit', keepalive: true,
+    body: JSON.stringify({ notify: id }) }).catch(() => {})
 }

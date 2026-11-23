@@ -9,8 +9,12 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 5.5rem;
+  overscroll-behavior-x: none;
   background: theme('colors.cream');
 }
+
+html, body { overflow-x: clip; }
 
 body {
   background: theme('colors.cream');

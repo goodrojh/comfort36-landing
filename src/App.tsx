@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import Hero from './components/Hero'
 import Marquee from './components/Marquee'
@@ -24,7 +24,10 @@ import { directLeads, googleLeads } from './lead-api'
 const home = import.meta.env.BASE_URL
 const isCart = location.pathname.endsWith('/cart.html')
 const isPrivacy = location.pathname.endsWith('/privacy.html')
-const isThanks = /\/thanks\/?$/.test(location.pathname)
+function subscribeRoute(update: () => void) {
+  window.addEventListener('popstate', update)
+  return () => window.removeEventListener('popstate', update)
+}
 type PrivacySettings = {
   operatorName?: string
   operatorDetails?: string
@@ -75,6 +78,8 @@ function Consent() {
 }
 
 export default function App() {
+  const path = useSyncExternalStore(subscribeRoute, () => location.pathname)
+  const isThanks = /\/thanks\/?$/.test(path)
   const cart = useCart()
   useEffect(() => { getAttribution() }, [])
 

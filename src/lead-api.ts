@@ -13,7 +13,7 @@ export function useLeadRequest() {
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
 
-  async function send(details: LeadDetails & { source: LeadSource; order?: string; correctionOf?: string }) {
+  async function send(details: LeadDetails & { source: LeadSource; order?: string; correctionOf?: string }, receipt?: string) {
     if (!directLeads || busy.current) return null
     busy.current = true
     setSending(true)
@@ -23,7 +23,7 @@ export function useLeadRequest() {
       const { source, name, phone, description, order, correctionOf } = details
       const data = { source, name, phone, description, order, correctionOf, consent: true, attribution: getAttribution() }
       const body = JSON.stringify(data)
-      if (request.current?.body !== body) request.current = { body, id: crypto.randomUUID() }
+      if (request.current?.body !== body) request.current = { body, id: receipt ?? crypto.randomUUID() }
       const { id } = request.current
       if (googleLeads) {
         await sendGoogleLead(id, details)

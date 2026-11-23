@@ -14,7 +14,7 @@ export default function CheckoutFrame({ count, title, description, icon, childre
   icon: ReactNode
   children: ReactNode
 }) {
-  return <main className="min-h-[72vh] bg-cream px-4 pb-12 pt-3 sm:pt-5 md:px-6 md:pb-20">
+  return <main className="min-h-[72vh] bg-cream px-4 pb-12 pt-[4.5rem] sm:pt-20 md:px-6 md:pb-20">
     <div className="mx-auto max-w-7xl">
       <Navbar count={count} subpage />
       <div className="relative isolate mt-3 overflow-hidden rounded-[1.5rem] bg-sand md:mt-5 md:rounded-[2rem]">

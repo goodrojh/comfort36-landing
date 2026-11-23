@@ -158,35 +158,62 @@ function receiveSiteLead(data, props) {
   }
 }
 
-// Acknowledgement follows storage. Each notification channel retries independently.
+function escapeHtml(value) {
+  return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
+function formatNotification(row) {
+  const [date, source, name, phone, comment, order] = row
+  const number = (row[14] || row[11]).slice(0, 8).toUpperCase()
+  const title = row[14] ? 'Исправление заявки' : source === 'Корзина' ? 'Заказ из корзины' :
+    source === 'Подбор комплекта' ? 'Подбор комплекта' : 'Обратный звонок'
+  const subject = title + ' № ' + number + ' · COMFORT 36'
+  const blocks = [['Клиент', name + '\n' + phone]]
+  if (order) blocks.push([source === 'Корзина' ? 'Состав заказа' : 'Комплект', order])
+  if (comment) blocks.push(['Комментарий клиента', comment])
+  const tags = UTM.flatMap((key, i) => row[6+i] ? [key + ': ' + row[6+i]] : [])
+  if (tags.length) blocks.push(['Реклама', tags.join('\n')])
+  const meta = source + ' · ' + date + ' МСК'
+  const plain = [subject, meta, ...blocks.map(([label, value]) => label + '\n' + value)].join('\n\n')
+  const telegram = ['<b>' + escapeHtml(subject) + '</b>', escapeHtml(meta),
+    ...blocks.map(([label, value]) => '<b>' + label + '</b>\n' + escapeHtml(value))].join('\n\n')
+  const html = '<div style="max-width:560px;font:16px/1.55 Arial,sans-serif;color:#183329">' +
+    '<div style="background:#163d2e;color:white;padding:20px;border-radius:14px"><small>COMFORT 36</small><h2 style="margin:6px 0">' +
+    escapeHtml(title) + ' № ' + number + '</h2>' + escapeHtml(meta) + '</div>' +
+    blocks.map(([label, value]) => '<div style="padding:16px;border-bottom:1px solid #d6e4da"><strong>' +
+      label + '</strong><br>' + escapeHtml(value).replace(/\n/g, '<br>') + '</div>').join('') + '</div>'
+  return {subject, plain, html, telegram}
+}
+
 function deliverPending() {
+  deliverNotifications()
+}
+
+function deliverNotifications(id) {
   const props = PropertiesService.getScriptProperties()
-  const sheet = SpreadsheetApp.openById(props.getProperty('SPREADSHEET_ID')).getSheetByName(GITHUB_SHEET)
-  const lock = LockService.getDocumentLock() || LockService.getUserLock()
+  const lock = LockService.getUserLock()
   if (!lock.tryLock(1000)) return
   try {
-    const last = sheet.getLastRow()
-    if (last < 2) return
-    const rows = sheet.getRange(2, 1, last - 1, 15).getDisplayValues()
+    const sheet = SpreadsheetApp.openById(props.getProperty('SPREADSHEET_ID')).getSheetByName(GITHUB_SHEET)
+    const first = id ? findRow(sheet, 12, id) : 2
+    const count = id ? 1 : sheet.getLastRow() - 1
+    if (!first || count < 1) return
+    const rows = sheet.getRange(first, 1, count, 15).getDisplayValues()
     let budget = 12
     for (const [index, row] of rows.entries()) {
-      // Rows from the older integration have no email state.
       if (!row[13] || (row[12] === 'Отправлено' && row[13] === 'Отправлено')) continue
-      const [date, source, name, phone, comment, order] = row
-      const subject = 'COMFORT 36 · ' + (row[14] ? 'Исправление заявки № ' : 'Новая заявка № ') +
-        (row[14] || row[11]).slice(0, 8).toUpperCase()
-      const message = [subject, date, source, 'Имя: ' + name, 'Телефон: ' + phone,
-        comment, order, ...UTM.map((key, i) => row[6+i] && key + ': ' + row[6+i])].filter(Boolean).join('\n')
+      const notice = formatNotification(row)
       for (const column of [13, 14]) {
         if (row[column - 1] === 'Отправлено') continue
         try {
           if (column === 13) telegramApi(props, 'sendMessage', {
-            chat_id: props.getProperty('TELEGRAM_CHAT_ID'), text: message.slice(0, 4096), protect_content: true,
+            chat_id: props.getProperty('TELEGRAM_CHAT_ID'), text: notice.telegram, parse_mode: 'HTML', protect_content: true,
           })
-          else MailApp.sendEmail(props.getProperty('LEAD_EMAIL_TO') || 'Halubets-1904@mail.ru', subject, message)
-          sheet.getRange(index + 2, column).setValue('Отправлено')
+          else MailApp.sendEmail({to: props.getProperty('LEAD_EMAIL_TO') || 'Halubets-1904@mail.ru',
+            subject: notice.subject, body: notice.plain, htmlBody: notice.html, name: 'COMFORT 36'})
+          sheet.getRange(first + index, column).setValue('Отправлено')
         } catch {
-          sheet.getRange(index + 2, column).setValue('Повторить')
+          sheet.getRange(first + index, column).setValue('Повторить')
         }
       }
       if (--budget === 0) break
@@ -207,6 +234,10 @@ function doPost(e) {
     data = JSON.parse(body)
   } catch {
     return reply(false)
+  }
+  if (typeof data?.notify === 'string' && ID.test(data.notify)) {
+    deliverNotifications(data.notify)
+    return reply(true)
   }
   if (data?.form_data && typeof data.form_data === 'object') {
     return reply(receiveSiteLead(data.form_data, props))

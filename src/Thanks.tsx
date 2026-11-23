@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react'
-import { CircleCheck, ClipboardList, Pencil } from 'lucide-react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { LoaderCircle, CircleCheck, ClipboardList, Pencil } from 'lucide-react'
 import CheckoutFrame, { checkoutPanel, outlineButton } from './CheckoutFrame'
 import { getLeadDetails, leadButton, LeadFields } from './LeadForm'
 import { directLeads, useLeadRequest } from './lead-api'
@@ -12,7 +12,20 @@ export default function Thanks({ count }: { count: number }) {
   const [editing, setEditing] = useState(false)
   const [notice, setNotice] = useState('')
   const { send, sending, error } = useLeadRequest()
-  const canEdit = directLeads
+  const started = useRef(false)
+  async function submitPending() {
+    if (!draft?.pending) return
+    if (!await send(draft, draft.receipt)) return
+    const confirmed = { ...draft, pending: false }
+    saveLeadDraft(confirmed)
+    setDraft(confirmed)
+  }
+  useEffect(() => {
+    if (started.current || !draft?.pending) return
+    started.current = true
+    void submitPending()
+  }, [draft])
+  const canEdit = directLeads && !draft?.pending
   async function edit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!draft || !canEdit) return
@@ -26,13 +39,15 @@ export default function Thanks({ count }: { count: number }) {
     setNotice('Исправления отправлены.')
   }
 
-  return <CheckoutFrame count={count} title={draft ? 'Спасибо за заявку!' : 'Ваша заявка'}
-    description={draft
+  return <CheckoutFrame count={count} title={draft?.pending ? (error ? 'Проверим отправку' : 'Отправляем заявку…') : draft ? 'Спасибо за заявку!' : 'Ваша заявка'}
+    description={draft?.pending ? (error ? 'Данные сохранены в этой вкладке. Можно повторить отправку.' : 'Проверяем приём заявки. Ваши данные уже здесь.')
+      : draft
       ? 'Менеджер скоро свяжется с вами по указанному номеру.'
       : 'Оставьте заявку на главной странице или в корзине.'}
-    icon={draft ? <CircleCheck size={36} /> : <ClipboardList size={36} />}>
+    icon={draft?.pending ? <LoaderCircle size={36} className={error ? undefined : "motion-safe:animate-spin"} /> : draft ? <CircleCheck size={36} /> : <ClipboardList size={36} />}>
     {draft && <div className="mt-4 grid items-start gap-4 md:mt-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-5">
       <section className={checkoutPanel}>
+        {draft.pending && error && <button className={leadButton + ' mb-4'} onClick={submitPending} disabled={sending}>Повторить отправку</button>}
         <h2 className="text-xl font-extrabold tracking-tight sm:text-2xl">Ваши данные</h2>
         <p className="mt-1 text-sm text-graphite">Проверьте имя и номер телефона.</p>
         {editing ? <form className="mt-4 grid gap-3" onSubmit={edit}>

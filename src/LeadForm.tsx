@@ -10,8 +10,14 @@ const inputClass = 'w-full min-w-0 rounded-xl border border-ink/20 bg-linen px-3
 const labelClass = 'grid gap-1 text-xs font-semibold text-graphite'
 export const leadButton = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-ink px-4 text-sm font-bold text-cream hover:bg-graphite disabled:opacity-60'
 
+function nationalNumber(value: string) {
+  const digits = value.replace(/\D/g, '')
+  return (/^[78]\d{10}$/.test(digits) ? digits.slice(1) : digits).slice(0, 10)
+}
+
 export function LeadFields({ details, compact = false, stacked = false }: { details?: LeadDetails; compact?: boolean; stacked?: boolean }) {
   const id = useId()
+  const [number, setNumber] = useState(() => nationalNumber(details?.phone ?? ''))
   return <div className="grid gap-2.5">
     <div className={`grid gap-2 ${stacked ? 'xl:grid-cols-2' : compact ? 'min-[380px]:max-md:grid-cols-2 xl:grid-cols-2' : 'sm:max-md:grid-cols-2 lg:grid-cols-2'}`}>
       <label className={labelClass}>Имя
@@ -19,8 +25,16 @@ export function LeadFields({ details, compact = false, stacked = false }: { deta
           placeholder="Ваше имя" autoComplete="name" onInput={clearValidity} />
       </label>
       <label className={labelClass}>Телефон
-        <input className={inputClass} name="phone" type="tel" inputMode="tel" maxLength={25} required defaultValue={details?.phone}
-          placeholder="+7 900 000…" autoComplete="tel" onInput={clearValidity} />
+        <span className={inputClass + ' flex items-center gap-2 focus-within:ring-2 focus-within:ring-primary'}>
+          <span aria-hidden="true">+7</span>
+          <input className="min-w-0 flex-1 bg-transparent outline-none" name="phone" type="tel" inputMode="tel"
+            aria-label="Телефон, код страны плюс семь" autoComplete="tel-national" required value={number}
+            placeholder="900 000 00 00" onChange={event => {
+              clearValidity(event)
+              const value = event.target.value
+              setNumber(value === '8' && !number ? '' : nationalNumber(value))
+            }} />
+        </span>
       </label>
     </div>
     <label className={labelClass} htmlFor={id}>Комментарий (необязательно)
@@ -37,13 +51,13 @@ function clearValidity(event: FormEvent<HTMLInputElement>) {
 export function getLeadDetails(form: HTMLFormElement): LeadDetails | null {
   const values = new FormData(form)
   const name = String(values.get('name') ?? '').trim()
-  const phone = String(values.get('phone') ?? '').trim()
+  const phone = '+7' + String(values.get('phone') ?? '')
   const description = String(values.get('description') ?? '').trim()
-  const field = !name ? 'name' : !/^\+?[\d\s()-]+$/.test(phone) || !/^\d{10,15}$/.test(phone.replace(/\D/g, '')) ? 'phone' : null
+  const field = !name ? 'name' : !/^\+7\d{10}$/.test(phone) ? 'phone' : null
   if (field) {
     const input = form.elements.namedItem(field)
     if (input instanceof HTMLInputElement) {
-      input.setCustomValidity(field === 'name' ? 'Укажите имя.' : 'Введите номер телефона с 10–15 цифрами.')
+      input.setCustomValidity(field === 'name' ? 'Укажите имя.' : 'Введите 10 цифр после +7.')
       input.reportValidity()
     }
     return null
@@ -65,6 +79,13 @@ export default function LeadForm({ order, source, compact = false }: { order?: s
     if (!details) return
 
     const draft = { ...details, order, source, createdAt: Date.now() }
+    const pending = { ...draft, receipt: crypto.randomUUID(), pending: true }
+    if (saveLeadDraft(pending)) {
+      history.pushState(null, '', thanksUrl)
+      window.dispatchEvent(new PopStateEvent('popstate'))
+      window.scrollTo({ top: 0, behavior: 'instant' })
+      return
+    }
     setMessage('')
     const receipt = await send(draft)
     if (!receipt) return

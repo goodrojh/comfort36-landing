@@ -19,7 +19,7 @@ export default function Navbar({ count, subpage = false }: { count: number; subp
     if (menu.current) menu.current.open = false
   }
 
-  return <header className="relative z-30">
+  return <header className="fixed inset-x-3 top-2 z-40 mx-auto max-w-7xl sm:inset-x-5 sm:top-4">
     <div className="flex min-w-0 items-center justify-between gap-1.5 rounded-full border border-white/10 bg-ink p-1.5 text-cream shadow-md sm:gap-3 sm:px-3">
       <a href={home || "#"} className="flex min-w-0 items-center gap-1.5 pl-1.5 text-[11px] font-extrabold leading-tight sm:gap-2 sm:px-2 sm:text-sm"
         aria-label="COMFORT 36, на главную">

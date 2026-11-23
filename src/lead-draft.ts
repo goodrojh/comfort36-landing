@@ -1,10 +1,10 @@
 export type LeadSource = 'hero' | 'cart' | 'config'
 export type LeadDetails = { name: string; phone: string; description: string }
-export type LeadDraft = LeadDetails & { source: LeadSource; order?: string; createdAt: number; receipt: string; preview?: boolean }
+export type LeadDraft = LeadDetails & { source: LeadSource; order?: string; createdAt: number; receipt: string; pending?: boolean }
 
 const key = 'comfort36:lead-draft:v1'
 const lifetime = 30 * 60 * 1000
-export const thanksUrl = `${import.meta.env.BASE_URL}thanks`
+export const thanksUrl = `${import.meta.env.BASE_URL}thanks/`
 
 export function readLeadDraft(): LeadDraft | null {
   try {

@@ -6,13 +6,15 @@ import { media } from '../media'
 
 export default function Hero({ count }: { count: number }) {
   return (
+    <>
+    <Navbar count={count} />
     <section className="w-full p-3 sm:p-4 md:p-6 bg-cream">
       <div className="relative isolate min-h-[min(39rem,86svh)] overflow-hidden rounded-2xl bg-sand md:min-h-[min(48rem,90svh)] md:rounded-[2rem]">
         <BgMedia video={media.heroVideo} poster={media.heroPoster} alt="Салон тягача с 3D-коврами COMFORT 36" />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-cream/30 via-cream/25 to-cream/95" />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-cream/95 via-cream/55 to-transparent" />
         <div className="relative mx-auto w-full max-w-7xl px-1 pb-8 pt-3 sm:px-2 sm:pt-4 md:px-0">
-          <Navbar count={count} />
+          <div className="h-14" aria-hidden="true" />
           <div className="mt-8 grid items-start gap-6 md:mt-[clamp(3.5rem,10svh,6rem)] md:grid-cols-12 md:gap-8 lg:gap-12">
             <div className="max-w-3xl md:col-span-7">
               <p className="mb-3 text-xs font-bold uppercase tracking-[0.16em] text-graphite">Грузовое ателье</p>
@@ -38,5 +40,6 @@ export default function Hero({ count }: { count: number }) {
         </div>
       </div>
     </section>
+    </>
   )
 }
