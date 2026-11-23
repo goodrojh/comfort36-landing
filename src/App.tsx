@@ -15,6 +15,7 @@ import Contact from './components/Contact'
 import Footer from './components/Footer'
 import FloatingContacts from './components/FloatingContacts'
 import LeadForm from './LeadForm'
+import Thanks from './Thanks'
 import VideoGallery from './VideoGallery'
 import { useCart } from './cart'
 import { money, productPhoto } from './catalog'
@@ -24,6 +25,7 @@ import { getAttribution } from './attribution'
 const home = import.meta.env.BASE_URL
 const isCart = location.pathname.endsWith('/cart.html')
 const isPrivacy = location.pathname.endsWith('/privacy.html')
+const isThanks = /\/thanks\/?$/.test(location.pathname)
 const isConsent = location.pathname.endsWith('/consent.html')
 
 function CartPage({ cart }: { cart: ReturnType<typeof useCart> }) {
@@ -68,7 +70,7 @@ function Privacy() {
   return <main className="px-4 py-12 md:py-20"><div className="max-w-3xl mx-auto space-y-4 text-graphite leading-relaxed">
     <a href={home} className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink underline underline-offset-4">← На главную</a>
     <h1 className="my-5 text-2xl sm:text-4xl md:text-5xl font-extrabold leading-tight text-ink [overflow-wrap:anywhere]">Конфиденциальность</h1>
-    <p>Формы на этом сайте подготавливают черновик обращения в браузере. Черновик не отправляется с сайта и не сохраняется на сервере. Сайт не запрашивает имя, телефон или адрес покупателя.</p>
+    <p>Формы на этом сайте подготавливают черновик обращения в браузере. Черновик не отправляется с сайта и не сохраняется на сервере. Имя, телефон, комментарий и состав заявки временно сохраняются в текущей вкладке, чтобы их можно было проверить и исправить. Черновик можно удалить со страницы «Спасибо». После 30 минут он недоступен при повторном открытии страницы.</p>
     <p>Если вы отправите черновик в ВК, сообщение получит автоателье «Комфорт 36». Вопросы об обработке данных можно направить в сообщения сообщества.</p>
     <p>Сайт хранит корзину в браузере, а допустимые рекламные метки сохраняет до закрытия вкладки для добавления к черновику заявки. Открытие карты загружает виджет Яндекса.</p>
     <a className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink underline underline-offset-4" href={contacts.vkWrite} target="_blank" rel="noopener noreferrer">Связаться с ателье в ВК <ArrowUpRight size={17} /></a>
@@ -90,7 +92,8 @@ export default function App() {
   useEffect(() => { getAttribution() }, [])
 
   return <MotionConfig reducedMotion="user">
-    {isCart ? <CartPage cart={cart} />
+    {isThanks ? <Thanks />
+      : isCart ? <CartPage cart={cart} />
       : isPrivacy ? <Privacy />
       : isConsent ? <Consent />
       : <main>
@@ -108,6 +111,6 @@ export default function App() {
         <Contact />
       </main>}
     <Footer />
-    {!isPrivacy && !isConsent && <FloatingContacts />}
+    {!isThanks && !isPrivacy && !isConsent && <FloatingContacts />}
   </MotionConfig>
 }

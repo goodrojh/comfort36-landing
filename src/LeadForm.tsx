@@ -1,78 +1,83 @@
-import { useState, type FormEvent } from 'react'
-import { ArrowUpRight, Copy } from 'lucide-react'
+import { useId, useState, type FormEvent } from 'react'
 import { contacts } from './media'
-import { getAttribution } from './attribution'
+import { ArrowUpRight } from 'lucide-react'
+import { saveLeadDraft, thanksUrl, type LeadDetails, type LeadSource } from './lead-draft'
 
-type Props = { order?: string; source: 'hero' | 'cart' | 'config'; compact?: boolean }
 
-export default function LeadForm({ order, source, compact = false }: Props) {
-  const [message, setMessage] = useState('')
-  const [copied, setCopied] = useState(false)
+const inputClass = 'w-full min-w-0 rounded-xl border border-ink/20 bg-linen px-3 py-2 min-h-11 text-base text-ink'
+const labelClass = 'grid gap-1 text-xs font-semibold text-graphite'
+export const leadButton = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-ink px-4 text-sm font-semibold text-cream hover:bg-graphite'
 
-  async function copy(text: string) {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-    } catch {
-      setCopied(false)
+export function LeadFields({ details, compact = false }: { details?: LeadDetails; compact?: boolean }) {
+  const id = useId()
+  return <div className="grid gap-2.5">
+    <div className={`grid gap-2 ${compact ? 'min-[380px]:max-md:grid-cols-2 xl:grid-cols-2' : 'sm:grid-cols-2'}`}>
+      <label className={labelClass}>Имя
+        <input className={inputClass} name="name" maxLength={80} required defaultValue={details?.name}
+          placeholder="Ваше имя" autoComplete="name" onInput={clearValidity} />
+      </label>
+      <label className={labelClass}>Телефон
+        <input className={inputClass} name="phone" type="tel" inputMode="tel" maxLength={25} required defaultValue={details?.phone}
+          placeholder="+7 900 000-00-00" autoComplete="tel" onInput={clearValidity} />
+      </label>
+    </div>
+    <label className={labelClass} htmlFor={id}>Комментарий (необязательно)
+      <textarea className={`${inputClass} resize-y`} name="description" id={id} rows={compact ? 1 : 2}
+        maxLength={500} defaultValue={details?.description} placeholder="Например, ковры для DAF 105" />
+    </label>
+  </div>
+}
+
+function clearValidity(event: FormEvent<HTMLInputElement>) {
+  event.currentTarget.setCustomValidity('')
+}
+
+export function getLeadDetails(form: HTMLFormElement): LeadDetails | null {
+  const values = new FormData(form)
+  const name = String(values.get('name') ?? '').trim()
+  const phone = String(values.get('phone') ?? '').trim()
+  const description = String(values.get('description') ?? '').trim()
+  const field = !name ? 'name' : !/^\+?[\d\s()-]+$/.test(phone) || !/^\d{10,15}$/.test(phone.replace(/\D/g, '')) ? 'phone' : null
+  if (field) {
+    const input = form.elements.namedItem(field)
+    if (input instanceof HTMLInputElement) {
+      input.setCustomValidity(field === 'name' ? 'Укажите имя.' : 'Введите номер телефона с 10–15 цифрами.')
+      input.reportValidity()
     }
+    return null
   }
+  return { name, phone, description }
+}
+
+export default function LeadForm({ order, source, compact = false }: { order?: string; source: LeadSource; compact?: boolean }) {
+  const [storageError, setStorageError] = useState(false)
 
   function prepare(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const values = new FormData(event.currentTarget)
-    if (values.get('consent') !== 'on') return
-    const model = String(values.get('model') ?? '').trim()
-    if (source === 'hero' && !model) {
-      const field = event.currentTarget.elements.namedItem('model')
-      if (field instanceof HTMLInputElement) {
-        field.setCustomValidity('Укажите марку и модель грузовика.')
-        field.reportValidity()
-      }
-      return
+    const form = event.currentTarget
+    if (new FormData(form).get('consent') !== 'on') return
+    const details = getLeadDetails(form)
+    if (!details) return
+    if (saveLeadDraft({ ...details, order, source, createdAt: Date.now() })) {
+      location.assign(thanksUrl)
+    } else {
+      setStorageError(true)
     }
-    const attribution = Object.entries(getAttribution()).map(([name, value]) => `${name}=${value}`).join(' · ')
-    const lines = [
-      source === 'cart' ? 'Здравствуйте! Хочу заказать в COMFORT 36:' : 'Здравствуйте! Подберите комплект COMFORT 36.',
-      order,
-      model && `Грузовик: ${model}`,
-      !order && `Интересует: ${values.get('kind')}`,
-      'Подтверждаю согласие на обработку данных для рассмотрения этой заявки.',
-      '[comfort36:site:' + source + ']',
-      attribution,
-    ].filter(Boolean)
-    const draft = lines.join('\n')
-    setMessage(draft)
-    void copy(draft)
   }
 
-  return (
-    <div className={compact ? "mt-3 border-t border-ink/10 pt-3" : "rounded-[1.25rem] border border-ink/10 bg-linen p-5 md:p-7"}>
-      <h2 className={compact ? "text-sm font-bold" : "text-xl font-bold"}>{source === 'cart' ? 'Оформить заказ' : 'Проверить наличие'}</h2>
-      {!compact && <p className="mt-2 text-sm text-muted">Мастер подтвердит наличие и доставку в сообщениях ВК.</p>}
-      <form className="mt-2 grid gap-2.5" onSubmit={prepare}>
-        {source !== 'config' && <label className="grid gap-1 text-xs font-semibold text-graphite"><span>Марка и модель {order && <span className="text-muted">(по желанию)</span>}</span>
-          <input className="w-full min-w-0 min-h-11 rounded-xl border border-ink/20 bg-linen px-3 text-base text-ink" name="model" maxLength={80} onInput={event => event.currentTarget.setCustomValidity('')} required={!order} placeholder="Например, DAF 105" autoComplete="off" />
-        </label>}
-        {!order && <label className="grid gap-1 text-xs font-semibold text-graphite">Что вас интересует
-          <select className="w-full min-w-0 min-h-11 rounded-xl border border-ink/20 bg-linen px-3 text-base text-ink" name="kind" defaultValue="3D-ковры «Соты»">
-            <option>3D-ковры «Соты»</option><option>Гладкие 3D-ковры</option><option>Чехлы на сиденья</option>
-          </select>
-        </label>}
-        <div className="text-[11px] leading-snug text-graphite">
-          <label className="flex items-start gap-2 cursor-pointer"><input className="mt-0.5 h-4 w-4 shrink-0 accent-primary" type="checkbox" name="consent" required /> Согласен на обработку персональных данных при отправке обращения в ВК</label>
-          <a className="ml-6 mt-1 inline-block underline underline-offset-2" href={`${import.meta.env.BASE_URL}consent.html`} target="_blank" rel="noopener noreferrer">Текст согласия</a>
-        </div>
-        <button className="inline-flex items-center justify-center gap-2 rounded-full bg-ink text-cream min-h-11 px-4 text-sm font-semibold hover:bg-graphite" type="submit">Подготовить заявку <ArrowUpRight size={18} /></button>
-      </form>
-      {message && <div className="mt-4 grid gap-2 border-t border-ink/10 pt-3">
-        <p role="status" className="text-xs text-graphite">{copied ? 'Заявка скопирована. Откройте ВК, вставьте текст в чат и отправьте.' : 'Скопируйте текст, откройте ВК и отправьте его в чат.'}</p>
-        <textarea className="w-full rounded-xl border border-ink/20 bg-linen p-2 text-sm" readOnly aria-label="Текст заявки для отправки в ВК" value={message} rows={4} onFocus={event => event.currentTarget.select()} />
-        <div className="flex flex-wrap gap-2">
-          <button className="inline-flex items-center justify-center gap-2 rounded-full border border-ink/20 min-h-11 px-4 text-sm font-semibold" type="button" onClick={() => { void copy(message) }}><Copy size={16} /> Копировать</button>
-          <a className="inline-flex items-center justify-center gap-2 rounded-full bg-ink text-cream min-h-11 px-4 text-sm font-semibold hover:bg-graphite" href={contacts.vkWrite} target="_blank" rel="noopener noreferrer">Открыть ВК <ArrowUpRight size={16} /></a>
-        </div>
-      </div>}
-    </div>
-  )
+  return <div className={compact ? 'mt-3 border-t border-ink/10 pt-3' : 'rounded-[1.25rem] border border-ink/10 bg-linen p-5 md:p-7'}>
+    <h2 className={compact ? 'text-sm font-bold' : 'text-xl font-bold'}>{source === 'cart' ? 'Оформить заказ' : 'Оставить заявку'}</h2>
+    <form className="mt-2 grid gap-2.5" onSubmit={prepare}>
+      <LeadFields compact={compact} />
+      <div className="text-[11px] leading-snug text-graphite">
+        <label className="flex items-start gap-2 cursor-pointer">
+          <input className="mt-0.5 h-4 w-4 shrink-0 accent-primary" type="checkbox" name="consent" required />
+          Согласен на обработку персональных данных при отправке обращения в ВК
+        </label>
+        <a className="ml-6 mt-1 inline-block underline underline-offset-2" href={`${import.meta.env.BASE_URL}consent.html`} target="_blank" rel="noopener noreferrer">Текст согласия</a>
+      </div>
+      {storageError && <p role="alert" className="text-sm">Не удалось сохранить черновик. <a className="underline" href={contacts.vkWrite} target="_blank" rel="noreferrer">Напишите нам напрямую в ВК.</a></p>}
+      <button className={leadButton} type="submit">Подготовить заявку <ArrowUpRight size={18} /></button>
+    </form>
+  </div>
 }

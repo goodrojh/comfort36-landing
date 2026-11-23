@@ -139,7 +139,7 @@ export default function FloatingContacts() {
           onClick={() => setOpen((v) => !v)}
           aria-label={open ? 'Закрыть контакты' : 'Связаться с нами'}
           aria-expanded={open}
-          className="w-14 h-14 rounded-full bg-primary text-linen grid place-items-center shadow-[0_14px_34px_-10px_rgba(176,123,62,0.9)] active:scale-95 transition-transform"
+          className="w-14 h-14 rounded-full bg-primary text-linen grid place-items-center shadow-[0_14px_34px_-10px_rgba(29,112,77,0.76)] active:scale-95 transition-transform"
         >
           <motion.span animate={{ rotate: open ? 90 : 0 }} transition={{ duration: 0.25 }}>
             {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}

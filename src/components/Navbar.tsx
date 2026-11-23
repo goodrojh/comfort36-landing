@@ -34,9 +34,9 @@ export default function Navbar({ count }: { count: number }) {
               key={l.label}
               href={l.href}
               className="text-sm tracking-wide transition-colors duration-300 whitespace-nowrap"
-              style={{ color: 'rgba(246,242,233,0.72)' }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#F6F2E9')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(246,242,233,0.72)')}
+              style={{ color: 'rgba(239,246,240,0.80)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#EFF6F0')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(239,246,240,0.80)')}
             >
               {l.label}
             </a>

@@ -39,13 +39,14 @@ function QuiltPreview({
       aria-label="Предпросмотр стёжки"
     >
       <defs>
-        <pattern id={id + "-honey"} width="56" height="48" patternUnits="userSpaceOnUse">
-          <path
-            d="M14 0 L42 0 L56 24 L42 48 L14 48 L0 24 Z"
-            fill="none"
-            stroke={thread}
-            strokeWidth="1.6"
-          />
+        <path id={id + '-cell'} d="M0 -19 L16.45 -9.5 L16.45 9.5 L0 19 L-16.45 9.5 L-16.45 -9.5 Z" />
+        <pattern id={id + '-honey'} width="36" height="64" patternUnits="userSpaceOnUse">
+          <g fill="none" stroke={thread} strokeWidth="1.2" strokeLinejoin="round">
+            <use href={'#' + id + '-cell'} x="18" y="0" />
+            <use href={'#' + id + '-cell'} x="18" y="64" />
+            <use href={'#' + id + '-cell'} x="0" y="32" />
+            <use href={'#' + id + '-cell'} x="36" y="32" />
+          </g>
         </pattern>
         <radialGradient id={id + "-sheen"} cx="30%" cy="20%" r="85%">
           <stop offset="0%" stopColor="#ffffff" stopOpacity="0.5" />

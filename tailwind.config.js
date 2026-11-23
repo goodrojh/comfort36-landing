@@ -4,15 +4,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        // светлая палитра ателье: тёплая слоновая кость + карамельная строчка
-        cream: '#F6F2E9',
-        sand: '#EBE4D6',
-        linen: '#FFFDF7',
-        ink: '#191510',
-        graphite: '#3E382E',
-        muted: '#7A7263',
-        primary: '#B07B3E', // карамельная нить — акцент
-        primarysoft: '#D9B27C',
+        // Светлые шалфейные поверхности и зелёный акцент бренда
+        cream: '#EFF6F0',
+        sand: '#E1EEE3',
+        linen: '#F9FDF9',
+        ink: '#132B21',
+        graphite: '#2E4B3D',
+        muted: '#4C6657',
+        primary: '#1D704D',
+        primarysoft: '#9EDBB5',
       },
       fontFamily: {
         sans: ['Manrope', 'system-ui', 'sans-serif'],
