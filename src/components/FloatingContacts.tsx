@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MessageCircle, Phone, X } from 'lucide-react'
 import { contacts } from '../media'
 import { asset } from '../catalog'
@@ -49,6 +49,35 @@ const channels = [
 export default function FloatingContacts() {
   const [open, setOpen] = useState(false)
   const [visible, setVisible] = useState(false)
+  const [overlapsForm, setOverlapsForm] = useState(false)
+  const trigger = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    const form = document.getElementById('hero-lead')
+    if (!form) return
+    let frame = 0
+    const measure = () => {
+      if (frame) return
+      frame = requestAnimationFrame(() => {
+        frame = 0
+        const toggle = trigger.current?.getBoundingClientRect()
+        const area = form.getBoundingClientRect()
+        setOverlapsForm(Boolean(toggle?.width && toggle.left < area.right && toggle.right > area.left
+          && toggle.top < area.bottom && toggle.bottom > area.top))
+      })
+    }
+    const resize = new ResizeObserver(measure)
+    resize.observe(form)
+    measure()
+    window.addEventListener('scroll', measure, { passive: true })
+    window.addEventListener('resize', measure)
+    return () => {
+      cancelAnimationFrame(frame)
+      resize.disconnect()
+      window.removeEventListener('scroll', measure)
+      window.removeEventListener('resize', measure)
+    }
+  }, [])
 
   // не мешаем первому экрану: показываем после прокрутки, но не позже 6 секунд —
   // чтобы кнопки нашлись и у тех, кто читает первый экран не прокручивая
@@ -69,14 +98,11 @@ export default function FloatingContacts() {
   }, [])
 
   return (
-    <div className="fixed z-40 right-3 bottom-3 md:right-5 md:bottom-5 flex flex-col items-end gap-2.5">
+    <div className="floating-contacts fixed z-40 right-3 bottom-3 md:right-5 md:bottom-5 flex flex-col items-end gap-2.5">
       {/* ДЕСКТОП: столбик кнопок с подписью при наведении */}
 
         {visible && (
           <div
-
-
-
 
             className="hidden md:flex flex-col gap-2.5"
           >
@@ -103,7 +129,6 @@ export default function FloatingContacts() {
           </div>
         )}
 
-
       {/* МОБИЛЬНЫЙ: одна кнопка, раскрывается в веер */}
       <div className="md:hidden flex flex-col items-end gap-2.5">
 
@@ -117,9 +142,6 @@ export default function FloatingContacts() {
                   target={c.id === 'call' ? undefined : '_blank'}
                   rel="noreferrer"
                   onClick={() => setOpen(false)}
-
-
-
 
                   className="flex items-center gap-2.5"
                 >
@@ -135,12 +157,12 @@ export default function FloatingContacts() {
               )
             })}
 
-
         <button
+          ref={trigger}
           onClick={() => setOpen((v) => !v)}
           aria-label={open ? 'Закрыть контакты' : 'Связаться с нами'}
           aria-expanded={open}
-          className="w-14 h-14 rounded-full bg-primary text-linen grid place-items-center shadow-[0_14px_34px_-10px_rgba(29,112,77,0.76)] active:scale-95 transition-transform"
+          className={`w-14 h-14 rounded-full bg-primary text-linen grid place-items-center shadow-[0_14px_34px_-10px_rgba(29,112,77,0.76)] active:scale-95 transition-transform ${overlapsForm && !open ? 'invisible' : ''}`}
         >
           <span>
             {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}

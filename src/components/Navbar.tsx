@@ -11,22 +11,23 @@ const links = [
   { label: 'Контакты', href: '#map' },
 ]
 
-export default function Navbar({ count }: { count: number }) {
+export default function Navbar({ count, subpage = false }: { count: number; subpage?: boolean }) {
+  const home = subpage ? import.meta.env.BASE_URL : ''
   const menu = useRef<HTMLDetailsElement>(null)
 
   function closeMenu() {
     if (menu.current) menu.current.open = false
   }
 
-  return <header className="absolute inset-x-2 top-2 z-30 mx-auto max-w-7xl sm:inset-x-4 sm:top-4">
+  return <header className="relative z-30">
     <div className="flex min-w-0 items-center justify-between gap-1.5 rounded-full border border-white/10 bg-ink p-1.5 text-cream shadow-md sm:gap-3 sm:px-3">
-      <a href="#" className="flex min-w-0 items-center gap-1.5 pl-1.5 text-[11px] font-extrabold leading-tight sm:gap-2 sm:px-2 sm:text-sm"
+      <a href={home || "#"} className="flex min-w-0 items-center gap-1.5 pl-1.5 text-[11px] font-extrabold leading-tight sm:gap-2 sm:px-2 sm:text-sm"
         aria-label="COMFORT 36, на главную">
         <img src={asset('brand.webp')} alt="" width="30" height="30" className="h-6 w-6 shrink-0 rounded-full sm:h-[30px] sm:w-[30px]" />
         <span className="hidden whitespace-nowrap min-[345px]:inline">COMFORT <span className="text-primarysoft">36</span></span>
       </a>
       <nav aria-label="Основное меню" className="hidden items-center gap-1 lg:flex xl:gap-2">
-        {links.map(link => <a key={link.href} href={link.href}
+        {links.map(link => <a key={link.href} href={home + link.href}
           className="rounded-full px-3 py-2 text-sm font-semibold text-cream/90 hover:bg-white/10">
           {link.label}
         </a>)}
@@ -50,7 +51,7 @@ export default function Navbar({ count }: { count: number }) {
             <Menu size={20} />
           </summary>
           <nav aria-label="Мобильное меню" className="absolute inset-x-0 top-full mt-2 grid rounded-2xl border border-ink/10 bg-linen p-2 text-ink shadow-lg">
-            {links.map(link => <a key={link.href} href={link.href} onClick={closeMenu}
+            {links.map(link => <a key={link.href} href={home + link.href} onClick={closeMenu}
               className="rounded-xl px-4 py-2.5 font-semibold hover:bg-sand">{link.label}</a>)}
             <a href={contacts.phoneHref} className="flex items-center gap-2 rounded-xl px-4 py-2.5 font-semibold hover:bg-sand">
               <Phone size={16} /> {contacts.phone}

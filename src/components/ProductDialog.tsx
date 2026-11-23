@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowUpRight, Check, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react'
+import { ArrowUpRight, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { catalogImage, cartUrl, money, type Product } from '../catalog'
 import { catalogPhotoCount } from '../catalog-photos'
+import CartControl from './CartControl'
 
 type Props = {
   product: Product
-  added: boolean
-  onAdd: () => void
+  quantity: number
+  onChange: (delta: number) => void
   onClose: () => void
 }
 
-export default function ProductDialog({ product, added, onAdd, onClose }: Props) {
+export default function ProductDialog({ product, quantity, onChange, onClose }: Props) {
   const dialog = useRef<HTMLDialogElement>(null)
   const [current, setCurrent] = useState(0)
   const count = catalogPhotoCount[product.id] ?? 1
@@ -76,11 +77,8 @@ export default function ProductDialog({ product, added, onAdd, onClose }: Props)
       </div>}
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
         <strong className="text-lg font-extrabold whitespace-nowrap sm:text-xl">{money(product.price)}</strong>
-        <button type="button" onClick={onAdd}
-          className="inline-flex items-center gap-2 min-h-11 px-4 rounded-full bg-ink text-cream text-sm font-semibold">
-          {added ? <Check size={16} /> : <Plus size={16} />} В корзину
-        </button>
-        {added && <a href={cartUrl} className="text-sm font-semibold underline underline-offset-4">Перейти в корзину</a>}
+        <CartControl quantity={quantity} label={`${product.title}, ${product.color}`} onChange={onChange} />
+        {quantity > 0 && <a href={cartUrl} className="text-sm font-semibold underline underline-offset-4">Перейти в корзину</a>}
         <a href={product.url} target="_blank" rel="noreferrer"
           className="inline-flex min-h-11 items-center gap-1 text-sm font-semibold underline underline-offset-4">
           Карточка в ВК <ArrowUpRight size={16} />

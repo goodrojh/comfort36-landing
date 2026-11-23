@@ -1,28 +1,18 @@
-import { useEffect, useState } from 'react'
-import { Camera, Check, Plus } from 'lucide-react'
+import { useState } from 'react'
+import { Camera } from 'lucide-react'
 import { StyledHeading } from './StyledHeading'
-import { cartUrl, catalog, catalogCover, money, type Product } from '../catalog'
+import { catalog, catalogCover, money, type Product } from '../catalog'
 import { catalogPhotoCount } from '../catalog-photos'
 import ProductDialog from './ProductDialog'
+import CartControl from './CartControl'
+import type { useCart } from '../cart'
 
 const filters = ['Все', 'Соты', 'Гладкие', 'Чехлы'] as const
 
-export default function Products({ onAdd }: { onAdd: (id: number, delta: number) => void }) {
+export default function Products({ cart }: { cart: ReturnType<typeof useCart> }) {
   const [filter, setFilter] = useState<(typeof filters)[number]>('Все')
   const [selected, setSelected] = useState<Product | null>(null)
-  const [added, setAdded] = useState<number | null>(null)
   const items = catalog.filter(item => filter === 'Все' || item.kind === filter)
-
-  useEffect(() => {
-    if (added === null) return
-    const timeout = window.setTimeout(() => setAdded(null), 2500)
-    return () => clearTimeout(timeout)
-  }, [added])
-
-  function add(product: Product) {
-    onAdd(product.id, 1)
-    setAdded(product.id)
-  }
 
   return (
     <section id="products" className="bg-sand py-12 md:py-16 px-4 md:px-6">
@@ -36,8 +26,7 @@ export default function Products({ onAdd }: { onAdd: (id: number, delta: number)
           {filters.map(label => <button key={label} type="button" aria-pressed={filter === label} onClick={() => setFilter(label)}
             className={`min-h-11 rounded-full border border-ink/15 px-4 text-sm font-semibold ${filter === label ? 'bg-ink text-cream' : 'bg-linen text-ink'}`}>{label}</button>)}
         </div>
-        <div className="sr-only" role="status">{added !== null && 'Товар добавлен в корзину.'}</div>
-        <div className="grid grid-cols-1 min-[540px]:grid-cols-2 min-[820px]:grid-cols-3 min-[1100px]:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-1 min-[540px]:grid-cols-2 min-[820px]:grid-cols-3 gap-3 md:gap-4">
           {items.map(product => <div key={product.id} className="h-full">
             <article className="h-full flex flex-col rounded-[1.25rem] overflow-hidden bg-linen border border-ink/10">
               <button type="button" onClick={() => setSelected(product)} aria-haspopup="dialog"
@@ -58,21 +47,18 @@ export default function Products({ onAdd }: { onAdd: (id: number, delta: number)
                 </div>
                 <p className="mt-1.5 text-xs text-graphite flex-1">{product.color}</p>
                 <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <button type="button" onClick={() => add(product)} aria-label={`В корзину: ${product.title}, ${product.color}`}
-                    className="inline-flex items-center gap-2 rounded-full bg-ink text-cream px-3 min-h-11 text-xs font-semibold">
-                    {added === product.id ? <Check size={16} /> : <Plus size={16} />} В корзину
-                  </button>
-                  {added === product.id
-                    ? <a href={cartUrl} className="text-xs font-semibold underline underline-offset-4">Перейти в корзину</a>
-                    : <button type="button" aria-haspopup="dialog" onClick={() => setSelected(product)} className="min-h-11 text-xs font-semibold underline underline-offset-4">Подробнее</button>}
+                  <CartControl quantity={cart.quantities[product.id] ?? 0} label={`${product.title}, ${product.color}`}
+                    onChange={delta => cart.change(product.id, delta)} />
+                  <button type="button" aria-haspopup="dialog" onClick={() => setSelected(product)}
+                    className="min-h-11 text-xs font-semibold underline underline-offset-4">Подробнее</button>
                 </div>
               </div>
             </article>
           </div>)}
         </div>
       </div>
-      {selected && <ProductDialog key={selected.id} product={selected} added={added === selected.id}
-        onAdd={() => add(selected)} onClose={() => setSelected(null)} />}
+      {selected && <ProductDialog key={selected.id} product={selected} quantity={cart.quantities[selected.id] ?? 0}
+        onChange={delta => cart.change(selected.id, delta)} onClose={() => setSelected(null)} />}
     </section>
   )
 }

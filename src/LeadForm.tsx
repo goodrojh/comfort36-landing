@@ -1,17 +1,18 @@
 import { useId, useState, type FormEvent } from 'react'
 import { contacts } from './media'
 import { ArrowUpRight } from 'lucide-react'
+import { directLeads, useLeadRequest } from './lead-api'
 import { saveLeadDraft, thanksUrl, type LeadDetails, type LeadSource } from './lead-draft'
 
 
 const inputClass = 'w-full min-w-0 rounded-xl border border-ink/20 bg-linen px-3 py-2 min-h-11 text-base text-ink'
 const labelClass = 'grid gap-1 text-xs font-semibold text-graphite'
-export const leadButton = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-ink px-4 text-sm font-semibold text-cream hover:bg-graphite'
+export const leadButton = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-ink px-4 text-sm font-bold text-cream hover:bg-graphite disabled:opacity-60'
 
-export function LeadFields({ details, compact = false }: { details?: LeadDetails; compact?: boolean }) {
+export function LeadFields({ details, compact = false, stacked = false }: { details?: LeadDetails; compact?: boolean; stacked?: boolean }) {
   const id = useId()
   return <div className="grid gap-2.5">
-    <div className={`grid gap-2 ${compact ? 'min-[380px]:max-md:grid-cols-2 xl:grid-cols-2' : 'sm:grid-cols-2'}`}>
+    <div className={`grid gap-2 ${stacked ? 'xl:grid-cols-2' : compact ? 'min-[380px]:max-md:grid-cols-2 xl:grid-cols-2' : 'sm:max-md:grid-cols-2 lg:grid-cols-2'}`}>
       <label className={labelClass}>Имя
         <input className={inputClass} name="name" maxLength={80} required defaultValue={details?.name}
           placeholder="Ваше имя" autoComplete="name" onInput={clearValidity} />
@@ -50,34 +51,55 @@ export function getLeadDetails(form: HTMLFormElement): LeadDetails | null {
 }
 
 export default function LeadForm({ order, source, compact = false }: { order?: string; source: LeadSource; compact?: boolean }) {
-  const [storageError, setStorageError] = useState(false)
+  const [message, setMessage] = useState('')
+  const [accepted, setAccepted] = useState(false)
+  const { send, sending, error } = useLeadRequest()
+  const hero = source === 'hero'
 
-  function prepare(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const form = event.currentTarget
-    if (new FormData(form).get('consent') !== 'on') return
+    if (accepted || new FormData(form).get('consent') !== 'on') return
     const details = getLeadDetails(form)
     if (!details) return
-    if (saveLeadDraft({ ...details, order, source, createdAt: Date.now() })) {
+
+    const draft = { ...details, order, source, createdAt: Date.now() }
+    setMessage('')
+    const receipt = directLeads ? await send(draft) : undefined
+    if (directLeads && !receipt) return
+    if (saveLeadDraft({ ...draft, receipt: receipt ?? undefined })) {
       location.assign(thanksUrl)
+    } else if (receipt) {
+      setAccepted(true)
+      setMessage('Спасибо! Заявка принята. Мы свяжемся с вами по указанному номеру.')
     } else {
-      setStorageError(true)
+      setMessage('Не удалось сохранить черновик.')
     }
   }
 
-  return <div className={compact ? (source === 'hero' ? '' : 'mt-3 border-t border-ink/10 pt-3') : 'rounded-[1.25rem] border border-ink/10 bg-linen p-5 md:p-7'}>
-    <h2 className={compact ? 'text-sm font-bold' : 'text-xl font-bold'}>{source === 'cart' ? 'Оформить заказ' : 'Оставить заявку'}</h2>
-    <form className="mt-2 grid gap-2.5" onSubmit={prepare}>
-      <LeadFields compact={compact} />
-      <div className="text-[11px] leading-snug text-graphite">
-        <label className="flex items-start gap-2 cursor-pointer">
-          <input className="mt-0.5 h-4 w-4 shrink-0 accent-primary" type="checkbox" name="consent" required />
-          Согласен на обработку персональных данных при отправке обращения в ВК
-        </label>
-        <a className="ml-6 mt-1 inline-block underline underline-offset-2" href={`${import.meta.env.BASE_URL}consent.html`} target="_blank" rel="noopener noreferrer">Текст согласия</a>
-      </div>
-      {storageError && <p role="alert" className="text-sm">Не удалось сохранить черновик. <a className="underline" href={contacts.vkWrite} target="_blank" rel="noreferrer">Напишите нам напрямую в ВК.</a></p>}
-      <button className={leadButton} type="submit">Подготовить заявку <ArrowUpRight size={18} /></button>
+  return <div id={hero ? 'hero-lead' : undefined} className={hero ? 'rounded-[1.5rem] border border-ink/10 bg-linen/95 p-4 shadow-[0_22px_50px_-32px_rgba(19,43,33,0.65)] sm:p-6 lg:p-8'
+    : compact ? 'mt-3 border-t border-ink/10 pt-3' : 'p-4 sm:p-6 lg:p-7'}>
+    <h2 className={compact ? 'text-sm font-bold' : 'text-2xl font-extrabold tracking-tight'}>
+      {source === 'cart' ? 'Контакты для заказа' : 'Оставить заявку'}
+    </h2>
+    <form className={hero ? 'mt-4 grid gap-3.5' : 'mt-3 grid gap-3'} onSubmit={submit}>
+      <fieldset className="grid min-w-0 gap-3" disabled={sending || accepted}>
+        <LeadFields compact={compact} stacked={hero} />
+        <div className="text-xs leading-snug text-graphite">
+          <label className="flex items-start gap-2 cursor-pointer">
+            <input className="mt-0.5 h-4 w-4 shrink-0 accent-primary" type="checkbox" name="consent" required />
+            Согласен на обработку персональных данных
+          </label>
+          <a className="ml-6 mt-1 inline-block underline underline-offset-2" href={`${import.meta.env.BASE_URL}consent.html`} target="_blank" rel="noopener noreferrer">Текст согласия</a>
+        </div>
+        {!directLeads && <p className="text-xs leading-snug text-graphite">После заполнения откроется черновик для отправки в ВК.</p>}
+        <button className={`${leadButton} w-full`} type="submit">
+          {accepted ? 'Заявка принята' : sending ? 'Отправляем…' : 'Оставить заявку'} <ArrowUpRight size={18} />
+        </button>
+      </fieldset>
+      {(error || message) && <p role={accepted ? 'status' : 'alert'} className="text-sm text-graphite">
+        {error || message} {!accepted && <a className="underline" href={contacts.phoneHref}>Позвонить в ателье</a>}
+      </p>}
     </form>
   </div>
 }

@@ -2,7 +2,7 @@ import { getAttribution } from './attribution'
 
 export type LeadSource = 'hero' | 'cart' | 'config'
 export type LeadDetails = { name: string; phone: string; description: string }
-export type LeadDraft = LeadDetails & { source: LeadSource; order?: string; createdAt: number }
+export type LeadDraft = LeadDetails & { source: LeadSource; order?: string; createdAt: number; receipt?: string }
 
 const key = 'comfort36:lead-draft:v1'
 const lifetime = 30 * 60 * 1000
@@ -15,6 +15,7 @@ export function readLeadDraft(): LeadDraft | null {
     if (typeof draft.createdAt !== 'number' || Date.now() - draft.createdAt >= lifetime ||
         typeof draft.name !== 'string' || typeof draft.phone !== 'string' ||
         typeof draft.description !== 'string' ||
+        (draft.receipt !== undefined && !/^[0-9a-f-]{36}$/.test(draft.receipt)) ||
         (draft.order !== undefined && typeof draft.order !== 'string') ||
         (draft.source !== 'cart' && draft.source !== 'hero' && draft.source !== 'config')) {
       sessionStorage.removeItem(key)

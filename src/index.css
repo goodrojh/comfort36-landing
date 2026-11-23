@@ -33,15 +33,9 @@ body {
   background-position: 0 0, 0 14px, 14px -14px, -14px 0;
 }
 
-.cart-quantity button {
-  display: grid;
-  place-items: center;
-  inline-size: 44px;
-  block-size: 44px;
-  border-radius: .75rem;
-  background: theme('colors.sand');
+body:has(#hero-lead :is(input, textarea):focus) .floating-contacts {
+  visibility: hidden;
 }
-.cart-quantity button:disabled { opacity: .5; }
 :focus-visible { outline: 2px solid theme('colors.primary'); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
