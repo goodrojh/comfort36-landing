@@ -1,5 +1,5 @@
 import { MapPin, Phone } from 'lucide-react'
-import { FadeUp, WordsPullUpMultiStyle } from './anim'
+import { StyledHeading } from './StyledHeading'
 import { contacts, media } from '../media'
 import { asset } from '../catalog'
 
@@ -22,7 +22,7 @@ export default function Contact() {
             Подбор комплекта
           </div>
 
-          <WordsPullUpMultiStyle
+          <StyledHeading
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-cream max-w-3xl mx-auto leading-[1.02]"
             segments={[
               { text: 'Оставьте модель тягача —' },
@@ -33,7 +33,7 @@ export default function Contact() {
             ]}
           />
 
-          <FadeUp delay={0.15}>
+          <div>
             <div className="mt-9 md:mt-12 flex flex-wrap justify-center gap-3">
               <a
                 href={contacts.phoneHref}
@@ -63,9 +63,9 @@ export default function Contact() {
                 <img src={asset('social/vk.svg')} alt="" width="19" height="19" />
               </a>
             </div>
-          </FadeUp>
+          </div>
 
-          <FadeUp delay={0.25}>
+          <div>
             <a
               href="#map"
               className="mt-10 md:mt-14 inline-flex items-center gap-2.5 text-cream/70 hover:text-cream text-xs sm:text-sm transition-colors"
@@ -73,7 +73,7 @@ export default function Contact() {
               <MapPin className="w-4 h-4 text-primarysoft" />
               {contacts.addressShort} — приезжайте посмотреть материал вживую
             </a>
-          </FadeUp>
+          </div>
         </div>
       </div>
     </section>

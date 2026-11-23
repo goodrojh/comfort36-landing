@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Camera, Check, Plus } from 'lucide-react'
-import { FadeUp, WordsPullUpMultiStyle } from './anim'
-import { cartUrl, catalog, money, productPhoto, type Product } from '../catalog'
+import { StyledHeading } from './StyledHeading'
+import { cartUrl, catalog, catalogCover, money, type Product } from '../catalog'
 import { catalogPhotoCount } from '../catalog-photos'
 import ProductDialog from './ProductDialog'
 
@@ -28,7 +28,7 @@ export default function Products({ onAdd }: { onAdd: (id: number, delta: number)
     <section id="products" className="bg-sand py-12 md:py-16 px-4 md:px-6">
       <div className="max-w-7xl mx-auto">
         <h2 className="text-center mb-5 md:mb-7">
-          <WordsPullUpMultiStyle className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-ink"
+          <StyledHeading className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-ink"
             segments={[{ text: 'Что мы шьём для вашей кабины.' }]} />
           <span className="block mt-2 text-sm md:text-base text-graphite">«Соты» — 7 990 ₽. Гладкие ковры — 10 990 ₽.</span>
         </h2>
@@ -38,12 +38,12 @@ export default function Products({ onAdd }: { onAdd: (id: number, delta: number)
         </div>
         <div className="sr-only" role="status">{added !== null && 'Товар добавлен в корзину.'}</div>
         <div className="grid grid-cols-1 min-[540px]:grid-cols-2 min-[820px]:grid-cols-3 min-[1100px]:grid-cols-4 gap-3 md:gap-4">
-          {items.map((product, index) => <FadeUp key={product.id} delay={Math.min(index, 2) * 0.08} className="h-full">
+          {items.map(product => <div key={product.id} className="h-full">
             <article className="h-full flex flex-col rounded-[1.25rem] overflow-hidden bg-linen border border-ink/10">
               <button type="button" onClick={() => setSelected(product)} aria-haspopup="dialog"
                 aria-label={`Открыть карточку: ${product.title}`}
                 className="relative block w-full aspect-[4/3] min-[820px]:aspect-[16/10] overflow-hidden bg-sand">
-                <img src={productPhoto(product.id)} alt={`${product.title}, ${product.color}`} loading="lazy" decoding="async"
+                <img src={catalogCover(product.id)} alt={`${product.title}, ${product.color}`} loading="lazy" decoding="async"
                   className="block w-full h-full object-contain" />
 
                 <span className="absolute top-2.5 left-2.5 bg-ink text-cream text-[10px] uppercase tracking-[0.12em] px-2.5 py-1 rounded-full">{product.kind}</span>
@@ -68,7 +68,7 @@ export default function Products({ onAdd }: { onAdd: (id: number, delta: number)
                 </div>
               </div>
             </article>
-          </FadeUp>)}
+          </div>)}
         </div>
       </div>
       {selected && <ProductDialog key={selected.id} product={selected} added={added === selected.id}

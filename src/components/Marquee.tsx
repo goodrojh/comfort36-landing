@@ -1,21 +1,11 @@
-const brands = ['MERCEDES', 'DAF', 'SHACMAN', 'VOLVO', 'FAW', 'MAN', 'SITRAK']
+const brands = ['Mercedes', 'DAF', 'Shacman', 'Volvo', 'FAW', 'MAN', 'Sitrak', 'Dongfeng']
 
 export default function Marquee() {
-  const row = [...brands, ...brands]
-  return (
-    <section className="bg-cream py-6 md:py-9 border-y border-ink/10 overflow-hidden">
-      <div className="marquee-mask">
-        <div className="flex w-max motion-safe:animate-marquee">
-          {row.map((b, i) => (
-            <div key={i} className="flex items-center shrink-0">
-              <span className="px-6 md:px-9 text-sm md:text-lg font-semibold tracking-[0.14em] text-graphite/55 whitespace-nowrap">
-                {b}
-              </span>
-              <span className="w-1 h-1 rounded-full bg-primary/60" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )
+  return <section className="border-y border-ink/10 bg-cream px-4 py-6 md:py-8" aria-label="Марки грузовиков">
+    <ul className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-6 gap-y-2 md:gap-x-10">
+      {brands.map(brand => <li key={brand} className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.13em] text-graphite/75">
+        <span aria-hidden="true" className="h-1 w-1 shrink-0 rounded-full bg-primary/60" />{brand}
+      </li>)}
+    </ul>
+  </section>
 }

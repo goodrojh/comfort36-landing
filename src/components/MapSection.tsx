@@ -1,5 +1,6 @@
+import { useEffect, useRef, useState } from 'react'
 import { ArrowUpRight, Box, MapPin, Package, Truck } from 'lucide-react'
-import { FadeUp, WordsPullUpMultiStyle } from './anim'
+import { StyledHeading } from './StyledHeading'
 import { contacts } from '../media'
 
 const delivery = [
@@ -21,6 +22,22 @@ const delivery = [
 ]
 
 export default function MapSection() {
+  const map = useRef<HTMLDivElement>(null)
+  const [showMap, setShowMap] = useState(false)
+
+  useEffect(() => {
+    const target = map.current
+    if (!target) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setShowMap(true)
+        observer.disconnect()
+      }
+    }, { rootMargin: '120px' })
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <section id="map" className="bg-cream py-16 md:py-28 px-4 md:px-6">
       <div className="max-w-7xl mx-auto">
@@ -28,7 +45,7 @@ export default function MapSection() {
           <div className="text-[10px] sm:text-xs tracking-[0.22em] uppercase text-primary mb-4">
             Где нас найти
           </div>
-          <WordsPullUpMultiStyle
+          <StyledHeading
             className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-ink max-w-3xl mx-auto"
             segments={[
               { text: 'Приезжайте в ателье —' },
@@ -42,20 +59,20 @@ export default function MapSection() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-4">
           {/* карта */}
-          <FadeUp className="lg:col-span-8">
-            <div className="relative rounded-[1.25rem] md:rounded-[1.75rem] overflow-hidden border border-ink/10 bg-sand h-[340px] sm:h-[420px] lg:h-full lg:min-h-[460px]">
-              <iframe
+          <div className="lg:col-span-8">
+            <div ref={map} className="relative rounded-[1.25rem] md:rounded-[1.75rem] overflow-hidden border border-ink/10 bg-sand h-[340px] sm:h-[420px] lg:h-full lg:min-h-[460px]">
+              {showMap && <iframe
                 src={contacts.mapEmbed}
                 title="Ателье COMFORT 36 на карте"
                 loading="lazy"
                 allowFullScreen
                 className="absolute inset-0 w-full h-full border-0"
-              />
+              />}
             </div>
-          </FadeUp>
+          </div>
 
           {/* адрес и доставка */}
-          <FadeUp delay={0.1} className="lg:col-span-4">
+          <div className="lg:col-span-4">
             <div className="h-full rounded-[1.25rem] md:rounded-[1.75rem] border border-ink/10 bg-linen p-5 md:p-7 flex flex-col">
               <div className="flex items-start gap-3">
                 <span className="shrink-0 w-10 h-10 rounded-full bg-primary/10 grid place-items-center">
@@ -102,7 +119,7 @@ export default function MapSection() {
                 {contacts.phone}
               </a>
             </div>
-          </FadeUp>
+          </div>
         </div>
       </div>
     </section>

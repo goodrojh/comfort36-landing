@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-type NetworkInfo = { saveData?: boolean; effectiveType?: string }
+type NetworkInfo = EventTarget & { saveData?: boolean; effectiveType?: string }
 
 /**
  * Разрешаем фоновое видео только там, где оно действительно уместно:
@@ -17,30 +17,20 @@ export function useHeavyMedia() {
     const net = (navigator as Navigator & { connection?: NetworkInfo }).connection
 
     const update = () => {
-      const slow = !!net?.effectiveType && /(^|-)(2g|slow-2g)$/.test(net.effectiveType)
+      const slow = !!net?.effectiveType && net.effectiveType !== '4g'
       setEnabled(mqWide.matches && !mqMotion.matches && !net?.saveData && !slow)
     }
 
     update()
+    net?.addEventListener('change', update)
     mqWide.addEventListener('change', update)
     mqMotion.addEventListener('change', update)
     return () => {
+      net?.removeEventListener('change', update)
       mqWide.removeEventListener('change', update)
       mqMotion.removeEventListener('change', update)
     }
   }, [])
 
   return enabled
-}
-
-/** Блокировка прокрутки под открытым оверлеем. */
-export function useLockScroll(locked: boolean) {
-  useEffect(() => {
-    if (!locked) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = prev
-    }
-  }, [locked])
 }

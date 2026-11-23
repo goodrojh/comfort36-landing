@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { Plus } from 'lucide-react'
-import { FadeUp, WordsPullUpMultiStyle } from './anim'
+import { StyledHeading } from './StyledHeading'
 
 const faq = [
   {
@@ -37,13 +36,13 @@ export default function Faq() {
     <section className="bg-sand py-16 md:py-28 px-4 md:px-6">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-10 md:mb-14">
-          <WordsPullUpMultiStyle
+          <StyledHeading
             className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-ink"
             segments={[{ text: 'Что обычно спрашивают.' }]}
           />
         </div>
 
-        <FadeUp>
+        <div>
           <div className="rounded-[1.25rem] md:rounded-[1.75rem] border border-ink/10 bg-linen overflow-hidden">
             {faq.map((item, i) => {
               const isOpen = open === i
@@ -63,26 +62,14 @@ export default function Faq() {
                       }`}
                     />
                   </button>
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                        className="overflow-hidden"
-                      >
-                        <p className="px-5 pb-6 md:px-8 md:pb-7 pr-12 text-sm text-muted leading-relaxed">
-                          {item.a}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {isOpen && <p className="px-5 pb-6 md:px-8 md:pb-7 pr-12 text-sm text-muted leading-relaxed">
+                    {item.a}
+                  </p>}
                 </div>
               )
             })}
           </div>
-        </FadeUp>
+        </div>
       </div>
     </section>
   )

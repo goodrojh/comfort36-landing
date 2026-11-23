@@ -1,4 +1,4 @@
-import { WordsPullUpMultiStyle, FadeUp } from './anim'
+import { StyledHeading } from './StyledHeading'
 
 const stats = [
   { value: '1 день', label: 'Срок пошива' },
@@ -14,7 +14,7 @@ export default function Offer() {
             Грузовое ателье
           </div>
 
-          <WordsPullUpMultiStyle
+          <StyledHeading
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl max-w-3xl mx-auto leading-[1] sm:leading-[0.95] text-ink"
             segments={[
               { text: 'Точные лекала', className: 'font-bold' },
@@ -27,14 +27,14 @@ export default function Offer() {
           />
 
           <div className="mt-8 md:mt-12 max-w-2xl mx-auto">
-            <FadeUp>
+            <div>
               <p className="text-graphite text-sm sm:text-base md:text-lg leading-relaxed">
                 3D-ковры повторяют рельеф пола, легко чистятся и защищают кабину от грязи и влаги. Шьём по лекалам для конкретной модели. Подскажем, какой комплект подойдёт вашему грузовику.
               </p>
-            </FadeUp>
+            </div>
           </div>
 
-          <FadeUp delay={0.15}>
+          <div>
             <div className="mt-10 md:mt-16 grid grid-cols-1 sm:grid-cols-3 gap-x-4 gap-y-8 border-t border-ink/10 pt-8 md:pt-12">
               {stats.map((s) => (
                 <div key={s.label}>
@@ -47,7 +47,7 @@ export default function Offer() {
                 </div>
               ))}
             </div>
-          </FadeUp>
+          </div>
         </div>
       </div>
     </section>

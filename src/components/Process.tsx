@@ -1,7 +1,5 @@
-import { useRef } from 'react'
-import { motion, useInView } from 'framer-motion'
 import { ArrowRight, Check } from 'lucide-react'
-import { WordsPullUpMultiStyle } from './anim'
+import { StyledHeading } from './StyledHeading'
 import { asset } from '../catalog'
 import { media, contacts } from '../media'
 
@@ -47,35 +45,32 @@ const cards: Card[] = [
 ]
 
 export default function Process() {
-  const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
     <section id="process" className="relative min-h-screen bg-cream py-16 md:py-28 px-4 md:px-6">
-      <div className="absolute inset-0 bg-noise opacity-[0.12] pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto">
         <div className="text-center mb-10 md:mb-16">
-          <WordsPullUpMultiStyle
+          <StyledHeading
             className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-ink"
             segments={[{ text: 'Заводская точность в частном ателье.' }]}
           />
           <br />
-          <WordsPullUpMultiStyle
+          <StyledHeading
             className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal text-muted"
             segments={[{ text: 'Три шага от скана до готового салона.' }]}
           />
         </div>
 
         <div
-          ref={ref}
+
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-2 md:gap-2 lg:h-[520px]"
         >
           {/* карточка-видео */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={inView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          <div
+
+
+
             className="relative rounded-[1.25rem] overflow-hidden bg-sand min-h-[320px] lg:min-h-0"
           >
             <img src={asset('portfolio/1001.webp')} alt="Ковры «Соты» в кабине грузовика" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" />
@@ -90,14 +85,14 @@ export default function Process() {
                 <a href="#works" className="mt-3 block text-sm font-semibold underline underline-offset-4">Смотреть видео</a>
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          {cards.map((card, i) => (
-            <motion.div
+          {cards.map(card => (
+            <div
               key={card.num}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={inView ? { opacity: 1, scale: 1 } : {}}
-              transition={{ duration: 0.8, delay: (i + 1) * 0.15, ease: [0.22, 1, 0.36, 1] }}
+
+
+
               className="rounded-[1.25rem] bg-linen border border-ink/10 p-5 md:p-6 flex flex-col"
             >
               <img
@@ -130,7 +125,7 @@ export default function Process() {
                 Подробнее
                 <ArrowRight className="w-4 h-4 -rotate-45 text-primary transition-transform duration-300 group-hover:translate-x-1" />
               </a>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

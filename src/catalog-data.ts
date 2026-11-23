@@ -11,6 +11,8 @@ const products: [number, string, string, number, Product['kind'], string][] = [
   [13501557, '3D-ковры для Shacman X6000', 'Паприка', 10990, 'Гладкие', '3d-kovriki-shacman-x6000-tsvet-paprika'],
   [13414302, '3D-ковры для Volvo Euro 6', 'Шоколадные', 10990, 'Гладкие', '3d-kovry-dlya-volvo-euro-6-tsvet-shokoladny'],
   [13466803, 'Чехлы для Mercedes MP 2–3', 'Чёрные', 7990, 'Чехлы', 'chekhly-na-sidenya-dlya-mercedes-mp-2-3-tsvet-chyorny'],
+  [13466801, 'Чехлы для FAW G7', 'Бежевые · чёрная алькантара', 7990, 'Чехлы', 'chekhly-na-sidenya-dlya-faw-g7-tsvet-bezhevy'],
+  [13474022, '3D-ковры для Dongfeng', 'Шоколадные', 10990, 'Гладкие', '3d-kovry-premium-dlya-dongfeng-tsvet-shokolad'],
 ]
 
 export const catalog = products.map(([id, title, color, price, kind, slug]) => ({

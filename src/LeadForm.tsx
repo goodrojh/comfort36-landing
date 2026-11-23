@@ -18,7 +18,7 @@ export function LeadFields({ details, compact = false }: { details?: LeadDetails
       </label>
       <label className={labelClass}>Телефон
         <input className={inputClass} name="phone" type="tel" inputMode="tel" maxLength={25} required defaultValue={details?.phone}
-          placeholder="+7 900 000-00-00" autoComplete="tel" onInput={clearValidity} />
+          placeholder="+7 900 000…" autoComplete="tel" onInput={clearValidity} />
       </label>
     </div>
     <label className={labelClass} htmlFor={id}>Комментарий (необязательно)
@@ -65,7 +65,7 @@ export default function LeadForm({ order, source, compact = false }: { order?: s
     }
   }
 
-  return <div className={compact ? 'mt-3 border-t border-ink/10 pt-3' : 'rounded-[1.25rem] border border-ink/10 bg-linen p-5 md:p-7'}>
+  return <div className={compact ? (source === 'hero' ? '' : 'mt-3 border-t border-ink/10 pt-3') : 'rounded-[1.25rem] border border-ink/10 bg-linen p-5 md:p-7'}>
     <h2 className={compact ? 'text-sm font-bold' : 'text-xl font-bold'}>{source === 'cart' ? 'Оформить заказ' : 'Оставить заявку'}</h2>
     <form className="mt-2 grid gap-2.5" onSubmit={prepare}>
       <LeadFields compact={compact} />

@@ -14,3 +14,4 @@ export const cartUrl = `${import.meta.env.BASE_URL}cart.html`
 export const catalogImage = (id: number, index = 0, thumb = false) =>
   asset(`catalog/${id}${index ? `-${index}` : ''}${thumb ? '-thumb' : ''}.webp`)
 export const productPhoto = (id: number) => catalogImage(id)
+export const catalogCover = (id: number) => asset(`catalog/${id}-card.webp`)

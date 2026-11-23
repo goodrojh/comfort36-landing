@@ -1,4 +1,4 @@
-import { FadeUp, WordsPullUpMultiStyle } from './anim'
+import { StyledHeading } from './StyledHeading'
 
 
 
@@ -14,13 +14,13 @@ export default function Compare() {
     <section className="bg-sand py-16 md:py-28 px-4 md:px-6">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10 md:mb-14">
-          <WordsPullUpMultiStyle
+          <StyledHeading
             className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-ink"
             segments={[{ text: 'Цена и сроки изготовления.' }]}
           />
         </div>
 
-        <FadeUp>
+        <div>
           <div className="rounded-[1.25rem] md:rounded-[1.75rem] border border-ink/10 bg-linen overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full table-fixed border-collapse">
@@ -61,14 +61,14 @@ export default function Compare() {
               </table>
             </div>
           </div>
-        </FadeUp>
+        </div>
 
-        <FadeUp delay={0.1}>
+        <div>
           <p className="mt-6 text-center text-xs text-muted max-w-2xl mx-auto">
             Сравнение основано на публичных прайсах и условиях профильных ателье и карточек
             маркетплейсов на август 2026 года.
           </p>
-        </FadeUp>
+        </div>
       </div>
     </section>
   )

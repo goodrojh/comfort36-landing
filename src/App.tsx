@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { MotionConfig } from 'framer-motion'
 import { ArrowUpRight, Minus, Plus, Trash2 } from 'lucide-react'
 import Hero from './components/Hero'
 import Marquee from './components/Marquee'
@@ -91,7 +90,7 @@ export default function App() {
   const cart = useCart()
   useEffect(() => { getAttribution() }, [])
 
-  return <MotionConfig reducedMotion="user">
+  return <>
     {isThanks ? <Thanks />
       : isCart ? <CartPage cart={cart} />
       : isPrivacy ? <Privacy />
@@ -112,5 +111,5 @@ export default function App() {
       </main>}
     <Footer />
     {!isThanks && !isPrivacy && !isConsent && <FloatingContacts />}
-  </MotionConfig>
+  </>
 }

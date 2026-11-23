@@ -1,11 +1,10 @@
 import { useId, useState, type ReactNode } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { Check } from 'lucide-react'
-import { FadeUp, WordsPullUpMultiStyle } from './anim'
+import { StyledHeading } from './StyledHeading'
 import LeadForm from '../LeadForm'
 import { money } from '../catalog'
 
-const TRUCKS = ['Mercedes', 'DAF', 'Shacman', 'Volvo', 'FAW', 'MAN', 'Sitrak', 'Другая модель']
+const TRUCKS = ['Mercedes', 'DAF', 'Shacman', 'Volvo', 'FAW', 'MAN', 'Sitrak', 'Dongfeng', 'Другая модель']
 
 const STITCHES = [
   { id: 'honey', label: 'Соты', price: 7990 },
@@ -29,7 +28,7 @@ function QuiltPreview({
   color: string
   thread: string
 }) {
-  const id = useId()
+  const patternId = useId()
   return (
     <svg
       viewBox="0 0 400 300"
@@ -39,16 +38,12 @@ function QuiltPreview({
       aria-label="Предпросмотр стёжки"
     >
       <defs>
-        <path id={id + '-cell'} d="M0 -19 L16.45 -9.5 L16.45 9.5 L0 19 L-16.45 9.5 L-16.45 -9.5 Z" />
-        <pattern id={id + '-honey'} width="36" height="64" patternUnits="userSpaceOnUse">
-          <g fill="none" stroke={thread} strokeWidth="1.2" strokeLinejoin="round">
-            <use href={'#' + id + '-cell'} x="18" y="0" />
-            <use href={'#' + id + '-cell'} x="18" y="64" />
-            <use href={'#' + id + '-cell'} x="0" y="32" />
-            <use href={'#' + id + '-cell'} x="36" y="32" />
-          </g>
+        {/* One line per edge. The halves on the tile borders join in adjacent tiles. */}
+        <pattern id={patternId + '-honey'} width="36" height="62.3538" patternUnits="userSpaceOnUse">
+          <path d="M0 10.3923 18 0 36 10.3923 M0 31.1769 18 41.5692 36 31.1769 M0 10.3923V31.1769 M36 10.3923V31.1769 M18 41.5692V62.3538"
+            fill="none" stroke={thread} strokeWidth="1.25" strokeLinejoin="round" strokeLinecap="round" />
         </pattern>
-        <radialGradient id={id + "-sheen"} cx="30%" cy="20%" r="85%">
+        <radialGradient id={patternId + "-sheen"} cx="30%" cy="20%" r="85%">
           <stop offset="0%" stopColor="#ffffff" stopOpacity="0.5" />
           <stop offset="60%" stopColor="#ffffff" stopOpacity="0.05" />
           <stop offset="100%" stopColor="#000000" stopOpacity="0.22" />
@@ -56,8 +51,8 @@ function QuiltPreview({
       </defs>
 
       <rect width="400" height="300" fill={color} />
-      {stitch === 'honey' && <rect width="400" height="300" fill={`url(#${id}-honey)`} opacity="0.85" />}
-      <rect width="400" height="300" fill={`url(#${id}-sheen)`} />
+      {stitch === 'honey' && <rect width="400" height="300" fill={`url(#${patternId}-honey)`} opacity="0.85" />}
+      <rect width="400" height="300" fill={`url(#${patternId}-sheen)`} />
     </svg>
   )
 }
@@ -82,7 +77,7 @@ export default function Configurator() {
           <div className="text-[10px] sm:text-xs tracking-[0.22em] uppercase text-primary mb-4">
             Конфигуратор кабины
           </div>
-          <WordsPullUpMultiStyle
+          <StyledHeading
             className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-ink max-w-3xl mx-auto leading-tight"
             segments={[
               { text: 'Соберите свой салон и увидите цену' },
@@ -93,26 +88,13 @@ export default function Configurator() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-4">
           {/* ЛЕВО: превью */}
-          <FadeUp className="lg:col-span-5">
+          <div className="lg:col-span-5">
             <div className="lg:sticky lg:top-6 rounded-[1.25rem] md:rounded-[1.75rem] overflow-hidden border border-ink/10 bg-linen">
               <div className="relative aspect-[4/3]">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={`${stitch}-${color}`}
-                    initial={{ opacity: 0, scale: 1.03 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute inset-0"
-                  >
-                    <QuiltPreview
-                      stitch={stitch}
-                      color={activeColor.hex}
-                      thread={activeColor.thread}
-                    />
-                  </motion.div>
-                </AnimatePresence>
-                <div className="absolute bottom-3 left-3 bg-linen/90 backdrop-blur-sm rounded-xl px-3 py-2">
+                <div className="absolute inset-0">
+                  <QuiltPreview stitch={stitch} color={activeColor.hex} thread={activeColor.thread} />
+                </div>
+                <div className="absolute bottom-3 left-3 bg-linen/95 rounded-xl px-3 py-2">
                   <div className="text-[10px] uppercase tracking-[0.14em] text-muted">
                     {STITCHES.find((s) => s.id === stitch)!.label} · {activeColor.label}
                   </div>
@@ -124,24 +106,24 @@ export default function Configurator() {
                   Предварительная стоимость
                 </div>
                 <div className="mt-2 flex items-end gap-3">
-                  <motion.div
-                    key={total}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.35 }}
+                  <div
+
+
+
+
                     className="text-4xl md:text-5xl font-extrabold text-ink tracking-tight"
                   >
                     {total.toLocaleString('ru-RU')} ₽
-                  </motion.div>
+                  </div>
                 </div>
                 <p className="mt-3 text-xs text-muted">Мастер сверит модель кабины и наличие выбранного цвета.</p>
                 <LeadForm key={selection} source="config" order={selection} compact />
               </div>
             </div>
-          </FadeUp>
+          </div>
 
           {/* ПРАВО: настройки */}
-          <FadeUp delay={0.1} className="lg:col-span-7">
+          <div className="lg:col-span-7">
             <div className="rounded-[1.25rem] md:rounded-[1.75rem] border border-ink/10 bg-linen p-5 md:p-8 space-y-8">
               <Block step="01" title="Ваш тягач" hint="Выберите марку">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -212,7 +194,7 @@ export default function Configurator() {
 
 
             </div>
-          </FadeUp>
+          </div>
         </div>
       </div>
     </section>

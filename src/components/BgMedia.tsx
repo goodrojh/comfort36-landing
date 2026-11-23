@@ -1,58 +1,36 @@
 import { useEffect, useRef } from 'react'
 import { useHeavyMedia } from '../hooks'
 
-/**
- * Фоновое медиа: на десктопе — зацикленное видео, на мобильных и медленной
- * сети — статичный постер. Видео монтируется только когда его реально можно
- * проиграть, поэтому мобильные браузеры не рисуют заглушку «play».
- */
-export default function BgMedia({
-  video,
-  poster,
-  alt,
-  className = '',
-}: {
-  video: string
-  poster: string
-  alt: string
-  className?: string
-}) {
+export default function BgMedia({ video, poster, alt }: { video: string; poster: string; alt: string }) {
   const allowVideo = useHeavyMedia()
-  const ref = useRef<HTMLVideoElement>(null)
+  const container = useRef<HTMLDivElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    el.muted = true
-    const play = () => void el.play().catch(() => {})
-    play()
-    el.addEventListener('canplay', play)
-    return () => el.removeEventListener('canplay', play)
+    const element = videoRef.current
+    const target = container.current
+    if (!element || !target) return
+    let inView = false
+    const update = () => {
+      if (inView && !document.hidden) void element.play().catch(() => {})
+      else element.pause()
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      inView = entry.intersectionRatio >= 0.15
+      update()
+    }, { threshold: 0.15 })
+    observer.observe(target)
+    document.addEventListener('visibilitychange', update)
+    return () => {
+      observer.disconnect()
+      document.removeEventListener('visibilitychange', update)
+      element.pause()
+    }
   }, [allowVideo])
 
-  if (!allowVideo) {
-    return (
-      <img
-        src={poster}
-        alt={alt}
-        className={`absolute inset-0 w-full h-full object-cover ${className}`}
-      />
-    )
-  }
-
-  return (
-    <video
-      ref={ref}
-      className={`absolute inset-0 w-full h-full object-cover ${className}`}
-      src={video}
-      poster={poster}
-      autoPlay
-      loop
-      muted
-      playsInline
-      preload="auto"
-      disablePictureInPicture
-      aria-label={alt}
-    />
-  )
+  return <div ref={container} className="absolute inset-0 -z-10">
+    <img src={poster} alt={alt} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover" />
+    {allowVideo && <video ref={videoRef} src={video} poster={poster} loop muted playsInline preload="none"
+      disablePictureInPicture aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" />}
+  </div>
 }

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { MessageCircle, Phone, X } from 'lucide-react'
 import { contacts } from '../media'
 import { asset } from '../catalog'
@@ -56,7 +55,9 @@ export default function FloatingContacts() {
   useEffect(() => {
     const show = () => setVisible(true)
     const onScroll = () => {
-      if (window.scrollY > 240) show()
+      if (window.scrollY <= 240) return
+      show()
+      window.removeEventListener('scroll', onScroll)
     }
     onScroll()
     const timer = setTimeout(show, 6000)
@@ -70,13 +71,13 @@ export default function FloatingContacts() {
   return (
     <div className="fixed z-40 right-3 bottom-3 md:right-5 md:bottom-5 flex flex-col items-end gap-2.5">
       {/* ДЕСКТОП: столбик кнопок с подписью при наведении */}
-      <AnimatePresence>
+
         {visible && (
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          <div
+
+
+
+
             className="hidden md:flex flex-col gap-2.5"
           >
             {channels.map((c) => {
@@ -99,27 +100,27 @@ export default function FloatingContacts() {
                 </a>
               )
             })}
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+
 
       {/* МОБИЛЬНЫЙ: одна кнопка, раскрывается в веер */}
       <div className="md:hidden flex flex-col items-end gap-2.5">
-        <AnimatePresence>
+
           {open &&
-            channels.map((c, i) => {
+            channels.map(c => {
 
               return (
-                <motion.a
+                <a
                   key={c.id}
                   href={c.href}
                   target={c.id === 'call' ? undefined : '_blank'}
                   rel="noreferrer"
                   onClick={() => setOpen(false)}
-                  initial={{ opacity: 0, y: 12, scale: 0.8 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 12, scale: 0.8 }}
-                  transition={{ duration: 0.25, delay: i * 0.04 }}
+
+
+
+
                   className="flex items-center gap-2.5"
                 >
                   <span className="bg-ink/90 text-cream text-xs font-semibold px-3 py-1.5 rounded-full">
@@ -130,10 +131,10 @@ export default function FloatingContacts() {
                   >
                     {c.image ? <img src={asset(`social/${c.image}.svg`)} alt="" width="22" height="22" /> : <Phone className="w-5 h-5" />}
                   </span>
-                </motion.a>
+                </a>
               )
             })}
-        </AnimatePresence>
+
 
         <button
           onClick={() => setOpen((v) => !v)}
@@ -141,9 +142,9 @@ export default function FloatingContacts() {
           aria-expanded={open}
           className="w-14 h-14 rounded-full bg-primary text-linen grid place-items-center shadow-[0_14px_34px_-10px_rgba(29,112,77,0.76)] active:scale-95 transition-transform"
         >
-          <motion.span animate={{ rotate: open ? 90 : 0 }} transition={{ duration: 0.25 }}>
+          <span>
             {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
-          </motion.span>
+          </span>
         </button>
       </div>
     </div>

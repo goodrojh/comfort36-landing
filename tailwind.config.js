@@ -18,15 +18,6 @@ export default {
         sans: ['Manrope', 'system-ui', 'sans-serif'],
         serif: ['"Playfair Display"', 'Georgia', 'serif'],
       },
-      keyframes: {
-        marquee: {
-          '0%': { transform: 'translateX(0)' },
-          '100%': { transform: 'translateX(-50%)' },
-        },
-      },
-      animation: {
-        marquee: 'marquee 32s linear infinite',
-      },
     },
   },
   plugins: [],

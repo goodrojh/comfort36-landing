@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ArrowUpRight, Maximize2, X } from 'lucide-react'
-import { FadeUp, WordsPullUpMultiStyle } from './anim'
+import { StyledHeading } from './StyledHeading'
 import { asset } from '../catalog'
 
 const reviewsUrl = 'https://vk.ru/reviews-216385176'
@@ -31,14 +31,14 @@ export default function Reviews() {
     <div className="max-w-7xl mx-auto">
       <header className="text-center mb-7 md:mb-10">
         <div className="text-[10px] sm:text-xs tracking-[0.22em] uppercase text-primary mb-4">Отзывы покупателей</div>
-        <h2><WordsPullUpMultiStyle className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-ink"
+        <h2><StyledHeading className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-ink"
           segments={[{ text: 'Отзывы из рейса.' }]} /></h2>
         <a href={reviewsUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-graphite underline underline-offset-4">
           4,7 из 5 · 79 отзывов во ВКонтакте <ArrowUpRight size={15} />
         </a>
       </header>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-        {reviews.map((review, index) => <FadeUp key={review.id} delay={(index % 3) * 0.08} className="h-full">
+        {reviews.map(review => <div key={review.id} className="h-full">
           <article id={`review-${review.id}`} className="h-full flex flex-col rounded-[1.25rem] bg-linen border border-ink/10 p-4 md:p-5">
             <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
               <h3 className="font-bold text-ink">{review.name}</h3>
@@ -54,7 +54,7 @@ export default function Reviews() {
               </span>
             </button>
           </article>
-        </FadeUp>)}
+        </div>)}
       </div>
       <div className="mt-7 text-center">
         <a href={reviewsUrl} target="_blank" rel="noreferrer"

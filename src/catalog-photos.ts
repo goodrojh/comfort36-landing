@@ -9,4 +9,6 @@ export const catalogPhotoCount: Record<number, number> = {
   13466803: 5,
   13501557: 5,
   13634612: 5,
+  13466801: 4,
+  13474022: 5,
 }
