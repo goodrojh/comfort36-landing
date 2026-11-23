@@ -7,3 +7,4 @@ dist
 
 # workflow нельзя запушить без scope "workflow" у токена gh
 .github/
+*.tsbuildinfo
