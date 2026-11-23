@@ -32,16 +32,16 @@ export default function VideoGallery() {
         <StyledHeading className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-ink"
           segments={[{ text: 'Кабины, из которых' }, { text: 'не хочется выходить.', className: 'italic font-serif font-normal text-primary' }]} />
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-        {(expanded ? clips : clips.slice(0, 3)).map(clip => <div key={clip[0]}>
-          <button className="group relative block text-left w-full aspect-[4/5] overflow-hidden rounded-[1.25rem] md:rounded-[1.75rem] bg-sand" type="button" onClick={() => setActive(clip)}>
-            <img className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1000ms] group-hover:scale-105" src={asset(`portfolio/${clip[0]}.webp`)} alt="" loading="lazy" decoding="async" width="360" height="640" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        {(expanded ? clips : clips.slice(0, 4)).map(clip => <div key={clip[0]}>
+          <button className="group relative block text-left w-full aspect-[9/16] overflow-hidden rounded-[1.25rem] md:rounded-[1.75rem] bg-sand" type="button" onClick={() => setActive(clip)}>
+            <img className="absolute inset-0 w-full h-full object-contain" src={asset(`portfolio/${clip[0]}.webp`)} alt="" loading="lazy" decoding="async" width="360" height="640" />
             <span className="absolute right-2 top-2 md:right-4 md:top-4 rounded-full bg-linen text-ink w-11 h-11 grid place-items-center"><Play size={19} fill="currentColor" /></span>
             <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink via-ink/65 to-transparent pt-9 pb-3 px-3 md:p-6 text-cream font-bold text-sm md:text-lg">{clip[1]}</span>
           </button></div>,
         )}
       </div>
-      <button type="button" className="mx-auto mt-8 block rounded-full min-h-11 px-5 border border-ink/20 font-semibold text-sm" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>{expanded ? 'Свернуть видео' : 'Показать ещё 8 видео'}</button>
+      <button type="button" className="mx-auto mt-8 block rounded-full min-h-11 px-5 border border-ink/20 font-semibold text-sm" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>{expanded ? 'Свернуть видео' : 'Показать ещё 7 видео'}</button>
     </div>
     <dialog ref={dialog} className="video-dialog m-auto rounded-2xl bg-ink p-2 text-cream w-[min(28rem,calc(100%-1.5rem))] max-w-[calc(100%-1.5rem)] max-h-[calc(100%-1.5rem)] backdrop:bg-ink/90" aria-label={active?.[1] ?? 'Просмотр видео'}
       onClose={() => setActive(null)} onClick={event => { if (event.target === event.currentTarget) dialog.current?.close() }}>

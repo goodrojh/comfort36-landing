@@ -34,7 +34,12 @@ function setupComfort36() {
   props.setProperty('SPREADSHEET_ID', book.getId())
   prepareSheet(book, SHEET, HEADERS)
   if (props.getProperty('ALLOW_CONTACT_DATA') === 'true') prepareSheet(book, CONTACT_SHEET, CONTACT_HEADERS)
-  if (props.getProperty('FORMSUBMIT_PREVIEW') === 'true') prepareSheet(book, GITHUB_SHEET, GITHUB_HEADERS)
+  const inbox = prepareSheet(book, GITHUB_SHEET, GITHUB_HEADERS)
+  inbox.getRange(1, 14, 1, 2).setValues([['Почта', 'Исходная заявка']])
+  MailApp.getRemainingDailyQuota()
+  if (!ScriptApp.getProjectTriggers().some(trigger => trigger.getHandlerFunction() === 'deliverPending')) {
+    ScriptApp.newTrigger('deliverPending').timeBased().everyMinutes(1).create()
+  }
 }
 
 function testComfort36() {
@@ -102,13 +107,12 @@ function connectTelegram() {
       ? [String(update.message.chat.id)] : [],
   ))]
   if (chats.length !== 1) throw new Error('Откройте личный чат с ботом и отправьте код из TELEGRAM_CONNECT_CODE, затем повторите.')
-  telegramApi(props, 'sendMessage', { chat_id: chats[0], text: 'COMFORT 36 · Telegram подключён. Это тестовое уведомление.' })
+  telegramApi(props, 'sendMessage', { chat_id: chats[0], text: 'COMFORT 36 · Telegram подключён.' })
   props.setProperty('TELEGRAM_CHAT_ID', chats[0])
   props.deleteProperty('TELEGRAM_CONNECT_CODE')
 }
 
-function receiveGitHubPreview(data, props) {
-  if (props.getProperty('FORMSUBMIT_PREVIEW') !== 'true') return false
+function receiveSiteLead(data, props) {
   const id = data['ID заявки']
   const source = data['Источник']
   const name = data['Имя']
@@ -129,9 +133,7 @@ function receiveGitHubPreview(data, props) {
     const sheet = book.getSheetByName(GITHUB_SHEET)
     if (!sheet) return false
     const idColumn = GITHUB_HEADERS.indexOf('ID события') + 1
-    const statusColumn = GITHUB_HEADERS.length
-    let row = findRow(sheet, idColumn, id)
-    if (row && sheet.getRange(row, statusColumn).getValue() === 'Отправлено') return true
+    if (findRow(sheet, idColumn, id)) return true
 
     const bucket = String(Math.floor(Date.now() / 3600000))
     const saved = (props.getProperty('GITHUB_HOUR_LIMIT') || '').split(':')
@@ -139,55 +141,60 @@ function receiveGitHubPreview(data, props) {
     if (used >= 20) return false
     props.setProperty('GITHUB_HOUR_LIMIT', bucket + ':' + (used + 1))
 
-    if (!row) {
+    {
       const tags = UTM.map(field => {
         const value = data[field]
         return typeof value === 'string' && /^[\p{L}\p{N}_. -]{1,80}$/u.test(value) && !/\d{8}/.test(value) ? textCell(value) : ''
       })
       const timestamp = Utilities.formatDate(new Date(), 'Europe/Moscow', 'yyyy-MM-dd HH:mm:ss')
-      sheet.appendRow([textCell(timestamp), source, textCell(name), textCell(phone), textCell(description), textCell(order), ...tags, id, 'Ожидает отправки'])
+      sheet.appendRow([textCell(timestamp), source, textCell(name), textCell(phone), textCell(description), textCell(order), ...tags, id, 'Ожидает отправки', 'Ожидает отправки', correction || ''])
       SpreadsheetApp.flush()
-      row = sheet.getLastRow()
     }
 
-    const linkedChat = props.getProperty('TELEGRAM_CHAT_ID')
-    if (!linkedChat) {
-      sheet.getRange(row, statusColumn).setValue('Чат не подключён')
-      return false
-    }
-    const title = correction ? 'Исправление заявки № ' + correction.slice(0, 8).toUpperCase()
-      : 'Новая тестовая заявка № ' + id.slice(0, 8).toUpperCase()
-    const message = [
-      'COMFORT 36 · ' + title, source,
-      'Имя: ' + name, 'Телефон: ' + phone,
-      description && 'Комментарий: ' + description, order,
-    ].filter(Boolean).join('\n')
-    try {
-      telegramApi(props, 'sendMessage', {
-        chat_id: linkedChat, text: message,
-        link_preview_options: { is_disabled: true }, protect_content: true,
-      })
-      sheet.getRange(row, statusColumn).setValue('Отправлено')
-      return true
-    } catch {
-      sheet.getRange(row, statusColumn).setValue('Ошибка Telegram')
-      return false
-    }
+    return true
   } finally {
     SpreadsheetApp.flush()
     lock.releaseLock()
   }
 }
 
-function testGitHubDelivery() {
+// Acknowledgement follows storage. Each notification channel retries independently.
+function deliverPending() {
   const props = PropertiesService.getScriptProperties()
-  const sent = receiveGitHubPreview({
-    'ID заявки': Utilities.getUuid(), 'Источник': 'Первый экран сайта',
-    'Имя': 'Тест COMFORT 36', 'Телефон': '+7 900 000 00 00',
-    'Комментарий': 'Проверка Google Таблицы и Telegram', 'Состав заявки': 'Демонстрационный комплект',
-    utm_source: 'github', utm_medium: 'test', utm_campaign: 'comfort36_preview',
-  }, props)
-  if (!sent) throw new Error('Проверьте настройки и колонку Telegram на листе «Заявки GitHub».')
+  const sheet = SpreadsheetApp.openById(props.getProperty('SPREADSHEET_ID')).getSheetByName(GITHUB_SHEET)
+  const lock = LockService.getDocumentLock() || LockService.getUserLock()
+  if (!lock.tryLock(1000)) return
+  try {
+    const last = sheet.getLastRow()
+    if (last < 2) return
+    const rows = sheet.getRange(2, 1, last - 1, 15).getDisplayValues()
+    let budget = 12
+    for (const [index, row] of rows.entries()) {
+      // Rows from the older integration have no email state.
+      if (!row[13] || (row[12] === 'Отправлено' && row[13] === 'Отправлено')) continue
+      const [date, source, name, phone, comment, order] = row
+      const subject = 'COMFORT 36 · ' + (row[14] ? 'Исправление заявки № ' : 'Новая заявка № ') +
+        (row[14] || row[11]).slice(0, 8).toUpperCase()
+      const message = [subject, date, source, 'Имя: ' + name, 'Телефон: ' + phone,
+        comment, order, ...UTM.map((key, i) => row[6+i] && key + ': ' + row[6+i])].filter(Boolean).join('\n')
+      for (const column of [13, 14]) {
+        if (row[column - 1] === 'Отправлено') continue
+        try {
+          if (column === 13) telegramApi(props, 'sendMessage', {
+            chat_id: props.getProperty('TELEGRAM_CHAT_ID'), text: message.slice(0, 4096), protect_content: true,
+          })
+          else MailApp.sendEmail(props.getProperty('LEAD_EMAIL_TO') || 'Halubets-1904@mail.ru', subject, message)
+          sheet.getRange(index + 2, column).setValue('Отправлено')
+        } catch {
+          sheet.getRange(index + 2, column).setValue('Повторить')
+        }
+      }
+      if (--budget === 0) break
+    }
+  } finally {
+    SpreadsheetApp.flush()
+    lock.releaseLock()
+  }
 }
 
 function doPost(e) {
@@ -202,7 +209,7 @@ function doPost(e) {
     return reply(false)
   }
   if (data?.form_data && typeof data.form_data === 'object') {
-    return reply(receiveGitHubPreview(data.form_data, props))
+    return reply(receiveSiteLead(data.form_data, props))
   }
   const key = props.getProperty('SHEETS_KEY')
   if (!key || key !== data?.key || (typeof data.id !== 'string' || !ID.test(data.id)) || !/^\d{4}-\d{2}-\d{2}$/.test(data.date) ||

@@ -1,11 +1,11 @@
 import { useRef, useState } from 'react'
 import { getAttribution } from './attribution'
-import { formsubmitEnabled, sendFormEmail } from './lead-formsubmit'
+import { sendGoogleLead } from './lead-google'
 import type { LeadDetails, LeadSource } from './lead-draft'
 
 const endpoint = import.meta.env.VITE_LEAD_API_URL?.trim()
-export const emailPreview = !endpoint && formsubmitEnabled
-export const directLeads = Boolean(endpoint || emailPreview)
+export const googleLeads = !endpoint
+export const directLeads = Boolean(endpoint || googleLeads)
 
 export function useLeadRequest() {
   const request = useRef<{ body: string; id: string }>()
@@ -25,8 +25,8 @@ export function useLeadRequest() {
       const body = JSON.stringify(data)
       if (request.current?.body !== body) request.current = { body, id: crypto.randomUUID() }
       const { id } = request.current
-      if (emailPreview) {
-        await sendFormEmail(id, details)
+      if (googleLeads) {
+        await sendGoogleLead(id, details)
         return id
       }
       if (!endpoint) return null
@@ -47,9 +47,7 @@ export function useLeadRequest() {
       if (response.status !== 202 || (await response.json()).id !== id) throw new Error('Invalid receipt')
       return id
     } catch {
-      setError(emailPreview
-        ? 'Сервис не подтвердил отправку. Проверьте тестовую почту перед повтором.'
-        : 'Не удалось подтвердить приём заявки. Попробуйте ещё раз.')
+      setError('Не удалось подтвердить приём заявки. Попробуйте ещё раз.')
       return null
     } finally {
       busy.current = false

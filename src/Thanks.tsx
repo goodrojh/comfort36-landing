@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { CircleCheck, ClipboardList, Pencil } from 'lucide-react'
 import CheckoutFrame, { checkoutPanel, outlineButton } from './CheckoutFrame'
 import { getLeadDetails, leadButton, LeadFields } from './LeadForm'
-import { directLeads, emailPreview, useLeadRequest } from './lead-api'
+import { directLeads, useLeadRequest } from './lead-api'
 import { readLeadDraft, saveLeadDraft } from './lead-draft'
 import { contacts } from './media'
 import ContactLinks from './components/ContactLinks'
@@ -12,23 +12,23 @@ export default function Thanks({ count }: { count: number }) {
   const [editing, setEditing] = useState(false)
   const [notice, setNotice] = useState('')
   const { send, sending, error } = useLeadRequest()
-  const canEdit = directLeads && Boolean(draft?.preview) === emailPreview
+  const canEdit = directLeads
   async function edit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!draft || !canEdit) return
     const details = getLeadDetails(event.currentTarget)
     if (!details) return
     const updated = { ...draft, ...details, createdAt: Date.now() }
-    if (!await send({ ...details, source: draft.source, correctionOf: draft.receipt })) return
+    if (!await send({ ...details, source: draft.source, order: draft.order, correctionOf: draft.receipt })) return
     saveLeadDraft(updated)
     setDraft(updated)
     setEditing(false)
-    setNotice(draft.preview ? 'Тестовое исправление отправлено.' : 'Исправления отправлены.')
+    setNotice('Исправления отправлены.')
   }
 
   return <CheckoutFrame count={count} title={draft ? 'Спасибо за заявку!' : 'Ваша заявка'}
     description={draft
-      ? (draft.preview ? 'Тестовая заявка отправлена. Проверьте почту.' : 'Менеджер скоро свяжется с вами по указанному номеру.')
+      ? 'Менеджер скоро свяжется с вами по указанному номеру.'
       : 'Оставьте заявку на главной странице или в корзине.'}
     icon={draft ? <CircleCheck size={36} /> : <ClipboardList size={36} />}>
     {draft && <div className="mt-4 grid items-start gap-4 md:mt-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-5">
