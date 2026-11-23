@@ -47,7 +47,7 @@ const cards: Card[] = [
 export default function Process() {
 
   return (
-    <section id="process" className="relative min-h-screen bg-cream py-16 md:py-28 px-4 md:px-6">
+    <section id="process" className="relative bg-cream py-12 md:py-20 px-4 md:px-6">
 
       <div className="relative max-w-7xl mx-auto">
         <div className="text-center mb-10 md:mb-16">
@@ -64,7 +64,7 @@ export default function Process() {
 
         <div
 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-2 md:gap-2 lg:h-[520px]"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-2 md:gap-2 lg:min-h-[440px]"
         >
           {/* карточка-видео */}
           <div

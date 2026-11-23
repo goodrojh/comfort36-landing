@@ -7,7 +7,7 @@ const stats = [
 ]
 export default function Offer() {
   return (
-    <section id="offer" className="bg-cream py-16 md:py-28 px-4 md:px-6">
+    <section id="offer" className="bg-cream py-12 md:py-20 px-4 md:px-6">
       <div className="max-w-6xl mx-auto">
         <div className="bg-linen rounded-[1.5rem] md:rounded-[2.5rem] border border-ink/10 px-5 py-12 md:px-16 md:py-20 text-center shadow-[0_40px_120px_-60px_rgba(25,21,16,0.45)]">
           <div className="text-[10px] sm:text-xs tracking-[0.22em] uppercase text-primary mb-6 md:mb-9">

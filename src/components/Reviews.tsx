@@ -27,7 +27,7 @@ export default function Reviews() {
     return () => { document.body.style.overflow = overflow }
   }, [active])
 
-  return <section id="reviews" className="bg-cream py-16 md:py-28 px-4 md:px-6">
+  return <section id="reviews" className="bg-cream py-12 md:py-20 px-4 md:px-6">
     <div className="max-w-7xl mx-auto">
       <header className="text-center mb-7 md:mb-10">
         <div className="text-[10px] sm:text-xs tracking-[0.22em] uppercase text-primary mb-4">Отзывы покупателей</div>

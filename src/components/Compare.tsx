@@ -11,7 +11,7 @@ const rows: { label: string; values: string[] }[] = [
 
 export default function Compare() {
   return (
-    <section className="bg-sand py-16 md:py-28 px-4 md:px-6">
+    <section className="bg-sand py-12 md:py-20 px-4 md:px-6">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10 md:mb-14">
           <StyledHeading

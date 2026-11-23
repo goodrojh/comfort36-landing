@@ -26,7 +26,7 @@ export default function VideoGallery() {
     if (active && dialog.current && !dialog.current.open) dialog.current.showModal()
   }, [active])
 
-  return <section className="bg-cream py-16 md:py-28 px-4 md:px-6" id="works">
+  return <section className="bg-cream py-12 md:py-20 px-4 md:px-6" id="works">
     <div className="max-w-7xl mx-auto">
       <h2 className="text-center mb-10 md:mb-16">
         <StyledHeading className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-ink"

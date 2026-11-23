@@ -39,7 +39,7 @@ export default function MapSection() {
   }, [])
 
   return (
-    <section id="map" className="bg-cream py-16 md:py-28 px-4 md:px-6">
+    <section id="map" className="bg-cream py-12 md:py-20 px-4 md:px-6">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-10 md:mb-14">
           <div className="text-[10px] sm:text-xs tracking-[0.22em] uppercase text-primary mb-4">
