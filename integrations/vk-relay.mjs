@@ -43,7 +43,7 @@ function normalize(event) {
   const message = event.object?.message
   if (typeof message?.text !== 'string' || message.out) return null
   const lines = message.text.split(/\r?\n/).map(line => line.trim())
-  const marker = lines.findIndex(line => /^\[comfort36:site:(hero|cart)\]$/.test(line))
+  const marker = lines.findIndex(line => /^\[comfort36:site:(hero|cart|config)\]$/.test(line))
   if (marker < 0) return null
   const utm = {}
   for (const part of (lines[marker + 1] ?? '').split(' · ')) {
@@ -52,7 +52,9 @@ function normalize(event) {
   }
   const key = event.event_id || (message.peer_id && message.conversation_message_id
     ? `${message.peer_id}/${message.conversation_message_id}` : '')
-  return { channel: lines[marker].includes(':cart]') ? 'Корзина сайта → ВК' : 'Первый экран → ВК', utm, key }
+  const channels = { hero: 'Первый экран → ВК', cart: 'Корзина сайта → ВК', config: 'Конфигуратор → ВК' }
+  const source = lines[marker].slice('[comfort36:site:'.length, -1)
+  return { channel: channels[source], utm, key }
 }
 
 function reportDate() {

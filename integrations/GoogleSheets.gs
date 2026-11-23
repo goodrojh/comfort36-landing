@@ -1,7 +1,7 @@
 const SHEET = 'Лиды'
 const UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']
 const HEADERS = ['Дата (МСК)', 'Канал', ...UTM, 'ID события']
-const CHANNELS = ['Первый экран → ВК', 'Корзина сайта → ВК', 'ВК Маркет']
+const CHANNELS = ['Первый экран → ВК', 'Корзина сайта → ВК', 'Конфигуратор → ВК', 'ВК Маркет']
 
 function setupComfort36() {
   const book = SpreadsheetApp.getActiveSpreadsheet()

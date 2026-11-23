@@ -1,3 +1,12 @@
+const local = `${import.meta.env.BASE_URL}media/`
+export const media = {
+  heroPoster: local + 'hero.webp',
+  heroVideo: local + 'hero.mp4',
+  iconScan: local + 'icon-scan.webp',
+  iconCut: local + 'icon-cut.webp',
+  iconSew: local + 'icon-sew.webp',
+}
+
 const PHONE_DIGITS = '79066770713'
 
 export const contacts = {
