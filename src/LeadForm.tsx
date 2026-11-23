@@ -1,5 +1,6 @@
 import { useId, useState, type FormEvent } from 'react'
 import { contacts } from './media'
+import ContactLinks from './components/ContactLinks'
 import { ArrowUpRight } from 'lucide-react'
 import { directLeads, useLeadRequest } from './lead-api'
 import { saveLeadDraft, thanksUrl, type LeadDetails, type LeadSource } from './lead-draft'
@@ -65,15 +66,14 @@ export default function LeadForm({ order, source, compact = false }: { order?: s
 
     const draft = { ...details, order, source, createdAt: Date.now() }
     setMessage('')
-    const receipt = directLeads ? await send(draft) : undefined
-    if (directLeads && !receipt) return
-    if (saveLeadDraft({ ...draft, receipt: receipt ?? undefined })) {
+    const receipt = await send(draft)
+    if (!receipt) return
+
+    if (saveLeadDraft({ ...draft, receipt })) {
       location.assign(thanksUrl)
-    } else if (receipt) {
-      setAccepted(true)
-      setMessage('Спасибо! Заявка принята. Мы свяжемся с вами по указанному номеру.')
     } else {
-      setMessage('Не удалось сохранить черновик.')
+      setAccepted(true)
+      setMessage('Спасибо за заявку! Менеджер скоро свяжется с вами по указанному номеру.')
     }
   }
 
@@ -82,7 +82,10 @@ export default function LeadForm({ order, source, compact = false }: { order?: s
     <h2 className={compact ? 'text-sm font-bold' : 'text-2xl font-extrabold tracking-tight'}>
       {source === 'cart' ? 'Контакты для заказа' : 'Оставить заявку'}
     </h2>
-    <form className={hero ? 'mt-4 grid gap-3.5' : 'mt-3 grid gap-3'} onSubmit={submit}>
+    {!directLeads ? <div className="mt-3 space-y-3">
+      <p className="text-sm text-graphite">Приём заявок через форму пока недоступен. Позвоните или напишите нам.</p>
+      <ContactLinks />
+    </div> : <form className={hero ? 'mt-4 grid gap-3.5' : 'mt-3 grid gap-3'} onSubmit={submit}>
       <fieldset className="grid min-w-0 gap-3" disabled={sending || accepted}>
         <LeadFields compact={compact} stacked={hero} />
         <div className="text-xs leading-snug text-graphite">
@@ -92,7 +95,6 @@ export default function LeadForm({ order, source, compact = false }: { order?: s
           </label>
           <a className="ml-6 mt-1 inline-block underline underline-offset-2" href={`${import.meta.env.BASE_URL}consent.html`} target="_blank" rel="noopener noreferrer">Текст согласия</a>
         </div>
-        {!directLeads && <p className="text-xs leading-snug text-graphite">После заполнения откроется черновик для отправки в ВК.</p>}
         <button className={`${leadButton} w-full`} type="submit">
           {accepted ? 'Заявка принята' : sending ? 'Отправляем…' : 'Оставить заявку'} <ArrowUpRight size={18} />
         </button>
@@ -100,6 +102,6 @@ export default function LeadForm({ order, source, compact = false }: { order?: s
       {(error || message) && <p role={accepted ? 'status' : 'alert'} className="text-sm text-graphite">
         {error || message} {!accepted && <a className="underline" href={contacts.phoneHref}>Позвонить в ателье</a>}
       </p>}
-    </form>
+    </form>}
   </div>
 }

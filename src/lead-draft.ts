@@ -1,8 +1,6 @@
-import { getAttribution } from './attribution'
-
 export type LeadSource = 'hero' | 'cart' | 'config'
 export type LeadDetails = { name: string; phone: string; description: string }
-export type LeadDraft = LeadDetails & { source: LeadSource; order?: string; createdAt: number; receipt?: string }
+export type LeadDraft = LeadDetails & { source: LeadSource; order?: string; createdAt: number; receipt: string }
 
 const key = 'comfort36:lead-draft:v1'
 const lifetime = 30 * 60 * 1000
@@ -15,7 +13,7 @@ export function readLeadDraft(): LeadDraft | null {
     if (typeof draft.createdAt !== 'number' || Date.now() - draft.createdAt >= lifetime ||
         typeof draft.name !== 'string' || typeof draft.phone !== 'string' ||
         typeof draft.description !== 'string' ||
-        (draft.receipt !== undefined && !/^[0-9a-f-]{36}$/.test(draft.receipt)) ||
+        (typeof draft.receipt !== 'string' || !/^[0-9a-f-]{36}$/.test(draft.receipt)) ||
         (draft.order !== undefined && typeof draft.order !== 'string') ||
         (draft.source !== 'cart' && draft.source !== 'hero' && draft.source !== 'config')) {
       sessionStorage.removeItem(key)
@@ -34,22 +32,4 @@ export function saveLeadDraft(draft: LeadDraft) {
   } catch {
     return false
   }
-}
-
-export function forgetLeadDraft() {
-  try { sessionStorage.removeItem(key) } catch { /* The browser may restrict storage. */ }
-}
-
-export function leadMessage(draft: LeadDraft) {
-  const attribution = Object.entries(getAttribution()).map(([field, value]) => `${field}=${value}`).join(' · ')
-  return [
-    draft.source === 'cart' ? 'Здравствуйте! Хочу заказать в COMFORT 36:' : 'Здравствуйте! Подберите комплект COMFORT 36.',
-    '[comfort36:site:' + draft.source + ']',
-    attribution,
-    draft.order,
-    `Имя: ${draft.name}`,
-    `Телефон: ${draft.phone}`,
-    draft.description && `Комментарий: ${draft.description}`,
-    'Подтверждаю согласие на обработку данных для рассмотрения этой заявки.',
-  ].filter(Boolean).join('\n')
 }

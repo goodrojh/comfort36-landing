@@ -28,10 +28,10 @@ export default function Products({ cart }: { cart: ReturnType<typeof useCart> })
         </div>
         <div className="grid grid-cols-1 min-[540px]:grid-cols-2 min-[820px]:grid-cols-3 gap-3 md:gap-4">
           {items.map(product => <div key={product.id} className="h-full">
-            <article className="h-full flex flex-col rounded-[1.25rem] overflow-hidden bg-linen border border-ink/10">
+            <article className="h-full flex flex-col rounded-[1.25rem] overflow-hidden bg-white border border-ink/15">
               <button type="button" onClick={() => setSelected(product)} aria-haspopup="dialog"
                 aria-label={`Открыть карточку: ${product.title}`}
-                className="relative block w-full aspect-[4/3] min-[820px]:aspect-[16/10] overflow-hidden bg-sand">
+                className="relative block w-full aspect-[4/3] min-[820px]:aspect-[16/10] overflow-hidden bg-white">
                 <img src={catalogCover(product.id)} alt={`${product.title}, ${product.color}`} loading="lazy" decoding="async"
                   className="block w-full h-full object-contain" />
 
