@@ -236,3 +236,7 @@ h1, h2, h3 { line-height: 1.08; }
   .quick-mobile summary::-webkit-details-marker { display: none; }
   .quick-panel { position: absolute; right: 0; bottom: 56px; display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 9px; background: var(--white); width: max-content; }
 }
+.legal h1 { overflow-wrap: anywhere; }
+@media(max-width: 720px) {
+  .legal h1 { font-size: clamp(1.55rem, 6.2vw, 2.5rem); }
+}
