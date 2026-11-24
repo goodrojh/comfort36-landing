@@ -6,7 +6,7 @@ const cols = ['COMFORT 36', 'Другие ателье', 'Маркетплейс
 
 const rows: { label: string; values: string[] }[] = [
   { label: 'Цена комплекта 3D-ковров', values: ['от 7 990 ₽', 'от 15 990 ₽', 'от 12 990 ₽'] },
-  { label: 'Срок изготовления', values: ['1 день', '1 день', 'Зависит от продавца'] },
+  { label: 'Срок изготовления', values: ['1 день', 'от 7 дней', 'Зависит от продавца'] },
 ]
 
 export default function Compare() {

@@ -14,7 +14,7 @@ export const contacts = {
   phoneHref: `tel:+${PHONE_DIGITS}`,
   whatsapp: `https://wa.me/${PHONE_DIGITS}`,
   telegram: `https://t.me/+${PHONE_DIGITS}`,
-  max: 'https://max.ru/id362504753677_biz',
+  max: 'https://max.ru/u/f9LHodD0cOJaH16z3gW6jf7eVhBms64KiaqJ5dxovY3SpGjyqUGzGsRl08Y',
   vk: 'https://vk.ru/autocomfort36',
   vkWrite: 'https://vk.ru/write-216385176',
   address: 'Воронежская обл., Рамонский р-н, д. Князево, ул. Сенновские Выселки, 10',

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowUpRight, Box, MapPin, Package, Truck } from 'lucide-react'
+import { ArrowUpRight, Box, MapPin, Package } from 'lucide-react'
 import { StyledHeading } from './StyledHeading'
 import { contacts } from '../media'
 
@@ -13,11 +13,6 @@ const delivery = [
     icon: Package,
     title: 'Пункт выдачи ТК',
     text: 'СДЭК и другие транспортные компании: выбираете удобный пункт и забираете когда удобно.',
-  },
-  {
-    icon: Truck,
-    title: 'Почта России',
-    text: 'Доставим в ближайшее почтовое отделение — по всей России.',
   },
 ]
 

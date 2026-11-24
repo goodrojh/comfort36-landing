@@ -243,7 +243,7 @@ function deliverNotifications(id) {
           if (column === 13) telegramApi(props, 'sendMessage', {
             chat_id: props.getProperty('TELEGRAM_CHAT_ID'), text: notice.telegram, parse_mode: 'HTML', protect_content: true,
           })
-          else MailApp.sendEmail({to: props.getProperty('LEAD_EMAIL_TO') || 'Halubets-1904@mail.ru',
+          else MailApp.sendEmail({to: props.getProperty('LEAD_EMAIL_TO') || 'cmfrt36@gmail.com',
             subject: notice.subject, body: notice.plain, htmlBody: notice.html, name: 'COMFORT 36'})
           sheet.getRange(first + index, column).setValue('Отправлено')
         } catch {

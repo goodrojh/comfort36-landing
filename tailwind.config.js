@@ -5,14 +5,14 @@ export default {
     extend: {
       colors: {
         // Светлые шалфейные поверхности и зелёный акцент бренда
-        cream: '#EFF6F0',
-        sand: '#E1EEE3',
-        linen: '#F9FDF9',
-        ink: '#132B21',
-        graphite: '#2E4B3D',
-        muted: '#4C6657',
-        primary: '#1D704D',
-        primarysoft: '#9EDBB5',
+        cream: '#EFFAF4',
+        sand: '#DBF3E6',
+        linen: '#F9FDFA',
+        ink: '#093B24',
+        graphite: '#24533C',
+        muted: '#446852',
+        primary: '#0E653E',
+        primarysoft: '#69E6AE',
       },
       fontFamily: {
         sans: ['Manrope', 'system-ui', 'sans-serif'],

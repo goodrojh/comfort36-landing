@@ -45,13 +45,13 @@ export default function Contact() {
                 </span>
               </a>
               <a
-                href={contacts.whatsapp}
+                href={contacts.max}
                 target="_blank"
                 rel="noreferrer"
                 className="group inline-flex items-center gap-2 rounded-full px-6 py-3.5 border border-cream/25 text-cream font-semibold text-sm sm:text-base hover:bg-cream/10 transition-colors"
               >
-                <img src={asset('social/whatsapp.svg')} alt="" width="19" height="19" />
-                Написать в WhatsApp
+                <img src={asset('social/max.svg')} alt="" width="19" height="19" />
+                Написать в MAX
               </a>
               <a
                 href={contacts.vkWrite}
