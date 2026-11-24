@@ -21,13 +21,13 @@ export function LeadFields({ details, compact = false, stacked = false }: { deta
   return <div className="grid gap-2.5">
     <div className={`grid gap-2 ${stacked ? 'xl:grid-cols-2' : compact ? 'min-[380px]:max-md:grid-cols-2 xl:grid-cols-2' : 'sm:max-md:grid-cols-2 lg:grid-cols-2'}`}>
       <label className={labelClass}>Имя
-        <input className={inputClass} name="name" maxLength={80} required defaultValue={details?.name}
+        <input className={inputClass + ' ym-disable-keys'} name="name" maxLength={80} required defaultValue={details?.name}
           placeholder="Ваше имя" autoComplete="name" onInput={clearValidity} />
       </label>
       <label className={labelClass}>Телефон
         <span className={inputClass + ' flex items-center gap-2 focus-within:ring-2 focus-within:ring-primary'}>
           <span aria-hidden="true">+7</span>
-          <input className="min-w-0 flex-1 bg-transparent outline-none" name="phone" type="tel" inputMode="tel"
+          <input className="ym-disable-keys min-w-0 flex-1 bg-transparent outline-none" name="phone" type="tel" inputMode="tel"
             aria-label="Телефон, код страны плюс семь" autoComplete="tel-national" required value={number}
             placeholder="900 000 00 00" onChange={event => {
               clearValidity(event)
@@ -38,7 +38,7 @@ export function LeadFields({ details, compact = false, stacked = false }: { deta
       </label>
     </div>
     <label className={labelClass} htmlFor={id}>Комментарий (необязательно)
-      <textarea className={`${inputClass} resize-y`} name="description" id={id} rows={compact ? 1 : 2}
+      <textarea className={`${inputClass} resize-y ym-disable-keys`} name="description" id={id} rows={compact ? 1 : 2}
         maxLength={500} defaultValue={details?.description} placeholder="Например, ковры для DAF 105" />
     </label>
   </div>
@@ -107,7 +107,7 @@ export default function LeadForm({ order, source, compact = false }: { order?: s
       <p className="text-sm text-graphite">Приём заявок через форму пока недоступен. Позвоните или напишите нам.</p>
       <ContactLinks />
     </div> : <form className={hero ? 'mt-4 grid gap-3.5' : 'mt-3 grid gap-3'} onSubmit={submit}>
-      <fieldset className="grid min-w-0 gap-3" disabled={sending || accepted}>
+      <fieldset className="ym-hide-content grid min-w-0 gap-3" disabled={sending || accepted}>
         <LeadFields compact={compact} stacked={hero} />
         <div className="text-xs leading-snug text-graphite">
           <label className="flex items-start gap-3 rounded-xl bg-sand/55 px-3 py-3 text-[13px] leading-relaxed">

@@ -24,13 +24,20 @@ export async function sendGoogleLead(id: string, lead: EmailLead) {
     'Комментарий': lead.description,
     'Состав заявки': lead.order,
   }
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    body: JSON.stringify({ form_data: fields }),
-    credentials: 'omit',
-    signal: AbortSignal.timeout(45000),
-  })
-  if (!response.ok || (await response.json()).ok !== true) throw new Error('Missing receipt')
+  async function submit(captcha?: string) {
+    const response = await fetch(endpoint, {
+      method: 'POST', body: JSON.stringify({ form_data: fields, captcha }),
+      credentials: 'omit', signal: AbortSignal.timeout(45000),
+    })
+    if (!response.ok) throw new Error('Missing receipt')
+    return await response.json()
+  }
+  let result = await submit()
+  if (typeof result.captchaSiteKey === 'string') {
+    const { verifyVisitor } = await import('./captcha')
+    result = await submit(await verifyVisitor(result.captchaSiteKey))
+  }
+  if (result.ok !== true) throw new Error('Missing receipt')
   // The scheduled worker covers a closed tab or an interrupted notification request.
   void fetch(endpoint, { method: 'POST', credentials: 'omit', keepalive: true,
     body: JSON.stringify({ notify: id }) }).catch(() => {})

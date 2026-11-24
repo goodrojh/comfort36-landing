@@ -274,6 +274,24 @@ function doPost(e) {
     return reply(true)
   }
   if (data?.form_data && typeof data.form_data === 'object') {
+    const sitekey = props.getProperty('SMARTCAPTCHA_SITE_KEY')
+    const secret = props.getProperty('SMARTCAPTCHA_SERVER_KEY')
+    if (sitekey || secret) {
+      if (!sitekey || !secret) return reply(false)
+      if (!data.captcha) {
+        return ContentService.createTextOutput(JSON.stringify({ ok: false, captchaSiteKey: sitekey }))
+          .setMimeType(ContentService.MimeType.JSON)
+      }
+      if (typeof data.captcha !== 'string' || data.captcha.length > 8192) return reply(false)
+      try {
+        const response = UrlFetchApp.fetch('https://smartcaptcha.cloud.yandex.ru/validate', {
+          method: 'post', payload: {secret, token: data.captcha}, muteHttpExceptions: true,
+        })
+        const verdict = JSON.parse(response.getContentText())
+        if (response.getResponseCode() !== 200 || verdict.status !== 'ok' ||
+            !['goodrojh.github.io', 'comfort-36.ru', 'www.comfort-36.ru'].includes(verdict.host)) return reply(false)
+      } catch { return reply(false) }
+    }
     return reply(receiveSiteLead(data.form_data, props))
   }
   const key = props.getProperty('SHEETS_KEY')

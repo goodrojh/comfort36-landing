@@ -12,8 +12,6 @@ const PHONE_DIGITS = '79066770713'
 export const contacts = {
   phone: '8 (906) 677-07-13',
   phoneHref: `tel:+${PHONE_DIGITS}`,
-  whatsapp: `https://wa.me/${PHONE_DIGITS}`,
-  telegram: `https://t.me/+${PHONE_DIGITS}`,
   max: 'https://max.ru/u/f9LHodD0cOJaH16z3gW6jf7eVhBms64KiaqJ5dxovY3SpGjyqUGzGsRl08Y',
   vk: 'https://vk.ru/autocomfort36',
   vkWrite: 'https://vk.ru/write-216385176',

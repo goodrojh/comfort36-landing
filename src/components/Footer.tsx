@@ -1,3 +1,4 @@
+import CookieSettings from './CookieSettings'
 import { ArrowUpRight } from 'lucide-react'
 import { contacts } from '../media'
 
@@ -20,22 +21,7 @@ export default function Footer() {
             <a href={contacts.phoneHref} className="hover:text-ink transition-colors">
               {contacts.phone}
             </a>
-            <a
-              href={contacts.whatsapp}
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-ink transition-colors"
-            >
-              WhatsApp
-            </a>
-            <a
-              href={contacts.telegram}
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-ink transition-colors"
-            >
-              Telegram
-            </a>
+            <a href={contacts.max} target="_blank" rel="noreferrer" className="hover:text-ink">MAX</a>
             <a
               href={contacts.vk}
               target="_blank"
@@ -61,6 +47,7 @@ export default function Footer() {
             </span>
             <ArrowUpRight className="w-3.5 h-3.5 text-primary transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </a>
+          <CookieSettings />
           <a href={`${import.meta.env.BASE_URL}privacy.html`} className="text-xs text-muted hover:text-ink underline underline-offset-4">Политика конфиденциальности</a>
         </div>
       </div>

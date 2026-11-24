@@ -1,8 +1,10 @@
+import { analyticsChoice } from './cookie-choice'
 const fields = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const
 type Attribution = Partial<Record<typeof fields[number], string>>
 const key = 'comfort36:attribution:v1'
 
 export function getAttribution(): Attribution {
+  if (analyticsChoice() !== 'yes') return {}
   const query = new URLSearchParams(location.search)
   const current: Attribution = {}
   for (const field of fields) {

@@ -5,8 +5,6 @@ import { contacts } from '../media'
 const messengers = [
   { label: 'ВКонтакте', url: contacts.vkWrite, icon: 'vk' },
   { label: 'MAX', url: contacts.max, icon: 'max' },
-  { label: 'Telegram', url: contacts.telegram, icon: 'telegram' },
-  { label: 'WhatsApp', url: contacts.whatsapp, icon: 'whatsapp' },
 ]
 
 export default function ContactLinks() {

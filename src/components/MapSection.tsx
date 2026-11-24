@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { ArrowUpRight, Box, MapPin, Package } from 'lucide-react'
 import { StyledHeading } from './StyledHeading'
 import { contacts } from '../media'
@@ -17,21 +17,7 @@ const delivery = [
 ]
 
 export default function MapSection() {
-  const map = useRef<HTMLDivElement>(null)
   const [showMap, setShowMap] = useState(false)
-
-  useEffect(() => {
-    const target = map.current
-    if (!target) return
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setShowMap(true)
-        observer.disconnect()
-      }
-    }, { rootMargin: '120px' })
-    observer.observe(target)
-    return () => observer.disconnect()
-  }, [])
 
   return (
     <section id="map" className="bg-cream py-12 md:py-20 px-4 md:px-6">
@@ -55,7 +41,8 @@ export default function MapSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-4">
           {/* карта */}
           <div className="lg:col-span-8">
-            <div ref={map} className="relative rounded-[1.25rem] md:rounded-[1.75rem] overflow-hidden border border-ink/10 bg-sand h-[340px] sm:h-[420px] lg:h-full lg:min-h-[460px]">
+            <div className="relative rounded-[1.25rem] md:rounded-[1.75rem] overflow-hidden border border-ink/10 bg-sand h-[340px] sm:h-[420px] lg:h-full lg:min-h-[460px]">
+              {!showMap && <button type="button" onClick={() => setShowMap(true)} className="absolute inset-0 m-auto h-fit w-fit rounded-full bg-ink px-5 py-3 font-semibold text-cream">Показать Яндекс Карту</button>}
               {showMap && <iframe
                 src={contacts.mapEmbed}
                 title="Ателье COMFORT 36 на карте"

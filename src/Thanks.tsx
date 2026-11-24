@@ -46,7 +46,7 @@ export default function Thanks({ count }: { count: number }) {
       : 'Оставьте заявку на главной странице или в корзине.'}
     icon={draft?.pending ? <LoaderCircle size={36} className={error ? undefined : "motion-safe:animate-spin"} /> : draft ? <CircleCheck size={36} /> : <ClipboardList size={36} />}>
     {draft && <div className="mt-4 grid items-start gap-4 md:mt-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-5">
-      <section className={checkoutPanel}>
+      <section className={checkoutPanel + ' ym-hide-content'}>
         {draft.pending && error && <button className={leadButton + ' mb-4'} onClick={submitPending} disabled={sending}>Повторить отправку</button>}
         <h2 className="text-xl font-extrabold tracking-tight sm:text-2xl">Ваши данные</h2>
         <p className="mt-1 text-sm text-graphite">Проверьте имя и номер телефона.</p>

@@ -21,22 +21,6 @@ const channels = [
     fg: 'text-ink',
   },
   {
-    id: 'wa',
-    label: 'WhatsApp',
-    href: contacts.whatsapp,
-    image: 'whatsapp',
-    bg: 'bg-linen',
-    fg: 'text-ink',
-  },
-  {
-    id: 'tg',
-    label: 'Telegram',
-    href: contacts.telegram,
-    image: 'telegram',
-    bg: 'bg-linen',
-    fg: 'text-ink',
-  },
-  {
     id: 'vk',
     label: 'ВКонтакте',
     href: contacts.vkWrite,
