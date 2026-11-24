@@ -1,8 +1,7 @@
-import { useId, useState, type ReactNode } from 'react'
-import { Check } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { StyledHeading } from './StyledHeading'
 import LeadForm from '../LeadForm'
-import { money } from '../catalog'
+import { asset, money } from '../catalog'
 
 const TRUCKS = ['Mercedes', 'DAF', 'Shacman', 'Volvo', 'FAW', 'MAN', 'Sitrak', 'Dongfeng', 'Другая модель']
 
@@ -10,64 +9,24 @@ const STITCHES = [
   { id: 'honey', label: 'Соты', price: 7990 },
   { id: 'smooth', label: 'Гладкие', price: 10990 },
 ] as const
-const COLORS = [
-  { id: 'black', label: 'Чёрный', hex: '#282627', thread: '#ADA8AA' },
-  { id: 'sand', label: 'Бежевый', hex: '#DCCDB0', thread: '#8A6430' },
-  { id: 'chocolate', label: 'Шоколадный', hex: '#6B5340', thread: '#D9B27C' },
-  { id: 'paprika', label: 'Паприка', hex: '#A2543C', thread: '#EFE7D6' },
-  { id: 'orange', label: 'Оранжевый', hex: '#CA622C', thread: '#F1C793' },
-]
-type StitchId = (typeof STITCHES)[number]['id']
-
-function QuiltPreview({
-  stitch,
-  color,
-  thread,
-}: {
-  stitch: StitchId
-  color: string
-  thread: string
-}) {
-  const patternId = useId()
-  return (
-    <svg
-      viewBox="0 0 400 300"
-      className="w-full h-full"
-      preserveAspectRatio="xMidYMid slice"
-      role="img"
-      aria-label="Предпросмотр стёжки"
-    >
-      <defs>
-        {/* One line per edge. The halves on the tile borders join in adjacent tiles. */}
-        <pattern id={patternId + '-honey'} width="36" height="62.3538" patternUnits="userSpaceOnUse">
-          <path d="M0 10.3923 18 0 36 10.3923 M0 31.1769 18 41.5692 36 31.1769 M0 10.3923V31.1769 M36 10.3923V31.1769 M18 41.5692V62.3538"
-            fill="none" stroke={thread} strokeWidth="1.25" strokeLinejoin="round" strokeLinecap="round" />
-        </pattern>
-        <radialGradient id={patternId + "-sheen"} cx="30%" cy="20%" r="85%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.5" />
-          <stop offset="60%" stopColor="#ffffff" stopOpacity="0.05" />
-          <stop offset="100%" stopColor="#000000" stopOpacity="0.22" />
-        </radialGradient>
-      </defs>
-
-      <rect width="400" height="300" fill={color} />
-      {stitch === 'honey' && <rect width="400" height="300" fill={`url(#${patternId}-honey)`} opacity="0.85" />}
-      <rect width="400" height="300" fill={`url(#${patternId}-sheen)`} />
-    </svg>
-  )
+const samples = {
+  honey: ['Серый · светлая нить', 'Шоколадный · светлая нить', 'Бежевый · бежевая нить', 'Паприка · бежевая нить', 'Чёрный · синяя нить', 'Чёрный · красная нить', 'Чёрный · серая нить'],
+  smooth: ['Чёрный', 'Синий', 'Шоколадный', 'Паприка', 'Серый', 'Бежевый'],
 }
+type StitchId = keyof typeof samples
+const sampleImage = (type: StitchId, index: number) => asset(`samples/${type}-${index + 1}.webp`)
 
 export default function Configurator() {
   const [truck, setTruck] = useState(TRUCKS[0])
   const [stitch, setStitch] = useState<StitchId>('honey')
-  const [color, setColor] = useState(COLORS[0].id)
-
-  const activeColor = COLORS.find((option) => option.id === color)!
+  const [choices, setChoices] = useState({ honey: 6, smooth: 0 })
+  const index = choices[stitch]
+  const label = '№ ' + (index + 1) + ' · ' + samples[stitch][index]
   const activeStitch = STITCHES.find((option) => option.id === stitch)!
   const total = activeStitch.price
   const selection = [
     `Грузовик: ${truck}`,
-    `3D-ковры: ${activeStitch.label}, цвет ${activeColor.label.toLowerCase()}`,
+    `3D-ковры: ${activeStitch.label}, образец ${label}`,
     `Цена комплекта: ${money(total)}`,
   ].join('\n')
   return (
@@ -92,11 +51,11 @@ export default function Configurator() {
             <div className="lg:sticky lg:top-6 rounded-[1.25rem] md:rounded-[1.75rem] overflow-hidden border border-ink/10 bg-linen">
               <div className="relative aspect-[4/3]">
                 <div className="absolute inset-0">
-                  <QuiltPreview stitch={stitch} color={activeColor.hex} thread={activeColor.thread} />
+                  <img src={sampleImage(stitch, index)} alt={label} className="h-full w-full object-cover" />
                 </div>
                 <div className="absolute bottom-3 left-3 bg-linen/95 rounded-xl px-3 py-2">
                   <div className="text-[10px] uppercase tracking-[0.14em] text-muted">
-                    {STITCHES.find((s) => s.id === stitch)!.label} · {activeColor.label}
+                    {STITCHES.find((s) => s.id === stitch)!.label} · {label}
                   </div>
                 </div>
               </div>
@@ -117,7 +76,7 @@ export default function Configurator() {
                   </div>
                 </div>
                 <p className="mt-3 text-xs text-muted">Мастер сверит модель кабины и наличие выбранного цвета.</p>
-                <LeadForm key={selection} source="config" order={selection} compact />
+                <LeadForm source="config" order={selection} compact />
               </div>
             </div>
           </div>
@@ -154,11 +113,7 @@ export default function Configurator() {
                       }`}
                     >
                       <div className="h-16 sm:h-20">
-                        <QuiltPreview
-                          stitch={s.id}
-                          color={activeColor.hex}
-                          thread={activeColor.thread}
-                        />
+                        <img src={sampleImage(s.id, choices[s.id])} alt="" className="h-full w-full object-cover" />
                       </div>
                       <div className="py-2 text-xs font-medium text-graphite">{s.label}</div>
                     </button>
@@ -167,28 +122,13 @@ export default function Configurator() {
               </Block>
 
               <Block step="03" title="Цвет экокожи" hint="Наличие оттенка уточнит мастер">
-                <div className="flex flex-wrap gap-3">
-                  {COLORS.map((c) => (
-                    <button
-                      key={c.id}
-                      aria-pressed={color === c.id} onClick={() => setColor(c.id)}
-                      title={c.label}
-                      aria-label={c.label}
-                      className={`relative w-11 h-11 rounded-full border-2 transition-all duration-300 ${
-                        color === c.id
-                          ? 'border-ink scale-110'
-                          : 'border-ink/10 hover:border-ink/40'
-                      }`}
-                      style={{ backgroundColor: c.hex }}
-                    >
-                      {color === c.id && (
-                        <Check
-                          className="w-4 h-4 absolute inset-0 m-auto"
-                          style={{ color: c.thread }}
-                        />
-                      )}
-                    </button>
-                  ))}
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {samples[stitch].map((name, i) => <button type="button" key={name}
+                    aria-pressed={index === i} onClick={() => setChoices({ ...choices, [stitch]: i })}
+                    className={`flex items-center gap-2 rounded-xl border p-2 text-left text-xs font-semibold ${index === i ? 'border-primary bg-sand ring-1 ring-primary' : 'border-ink/15'}`}>
+                    <img src={sampleImage(stitch, i)} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                    <span>№ {i + 1}<br />{name}</span>
+                  </button>)}
                 </div>
               </Block>
 

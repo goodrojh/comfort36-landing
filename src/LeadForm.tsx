@@ -110,11 +110,10 @@ export default function LeadForm({ order, source, compact = false }: { order?: s
       <fieldset className="grid min-w-0 gap-3" disabled={sending || accepted}>
         <LeadFields compact={compact} stacked={hero} />
         <div className="text-xs leading-snug text-graphite">
-          <label className="flex items-start gap-2 cursor-pointer">
-            <input className="mt-0.5 h-4 w-4 shrink-0 accent-primary" type="checkbox" name="consent" required />
-            Согласен на обработку персональных данных
+          <label className="flex items-start gap-3 rounded-xl bg-sand/55 px-3 py-3 text-[13px] leading-relaxed">
+            <input className="mt-0.5 h-5 w-5 shrink-0 accent-primary" type="checkbox" name="consent" required />
+            <span>Я даю <a className="underline underline-offset-2" href={`${import.meta.env.BASE_URL}consent.html`} target="_blank" rel="noopener noreferrer">согласие на обработку персональных данных</a> и ознакомлен(а) с <a className="underline underline-offset-2" href={`${import.meta.env.BASE_URL}privacy.html`} target="_blank" rel="noopener noreferrer">политикой обработки персональных данных</a>.</span>
           </label>
-          <a className="ml-6 mt-1 inline-block underline underline-offset-2" href={`${import.meta.env.BASE_URL}consent.html`} target="_blank" rel="noopener noreferrer">Текст согласия</a>
         </div>
         <button className={`${leadButton} w-full`} type="submit">
           {accepted ? 'Заявка принята' : sending ? 'Отправляем…' : 'Оставить заявку'} <ArrowUpRight size={18} />
